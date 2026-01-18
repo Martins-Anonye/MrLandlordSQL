@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+#con{
+    width: 100%;
+    height: 100%;
+    color: white;
+    position: relative;
+    z-index: 2;
+}
+    
+h2{
+    color:white;
+    font-size: x-large;
+}
+tr{
+    font-size: x-large;
+}
+
+
+    </style>
+
+
+<link rel="stylesheet" href="../background/backgroundcss.css"/>
+
+
+<script  src="fireconfiguration.js"> </script>
+<script src="landlorduploadscript.js"></script>
+</head>
+
+<body>
+
+    <div id="backgroundDesign"  imageLocation="../IMAGES/house.png"></div>
+    
+   <div id="con">
+    <div id="semicon"></div>
+
+    <form  method="get">
+        <table>
+            <tr><h2>LANDLORD PERSONAL DETAILS</h2></tr>
+            <tr><td> First Name</td><td><input type="text" name="" id="first"></td></tr>
+            <tr><td>Second Name</td><td><input type="text" name="" id="second"></td></tr>
+             <tr><td>Other Names</td><td><input type="text" name="" id="other"></td></tr>
+             <tr><td>Phone number</td><td><input type="tel" name="" id="phone"></td></tr>
+             <tr><td>Alternative phone number</td><td><input type="tel" name="" id="alter"></td></tr>
+             <tr><td>Email</td><td><input type="email" name="" id="email"></td></tr>
+             <tr><td>
+              <button id="save1" >Save to firebase</button> <br>
+             <button  id="normalSave" >Save</button>
+            </td></tr>
+             
+
+            
+   <tr><td><h2>BANK DETAILS</h2></td></tr>
+   <tr><td>Bank name</td><td><input type="text" name="" id="bank"></td></tr>
+  <tr><td>Bank account number</td><td><input type="number" name="" id="account"></td></tr>
+  <tr><td>Account name </td><td><input type="text" name="" id="accountname"></td></tr>
+   </div>
+     <tr><td>
+         <input type="submit" name="" id="submit"></td></tr>
+
+           
+          
+             
+           
+            <div class="trs"></div>
+            </table>
+            </form>   
+   </div>
+   
+   <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-database.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase.js"></script>
+      
+   
+     <script>
+
+var submit  = document.getElementById("submit");
+submit.addEventListener("click", e=>{
+   // alert("Nav");
+   e.preventDefault();
+         window.location.href= "house.html";
+
+         return true;
+})
+
+     </script>
+     
+   <script src="../background/backgroundscript.js"></script>
+</body>
+</html>

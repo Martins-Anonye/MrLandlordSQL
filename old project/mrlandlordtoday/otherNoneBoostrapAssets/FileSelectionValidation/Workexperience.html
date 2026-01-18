@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            background-color: darkblue;
+            color:white;
+        }
+        
+        .inputWorkExperienceTable{
+            text-align: left;
+        }
+
+.filenamSelected, .EditFilenamSelected{
+    max-width:130px;
+    height: 30px;
+    max-height: 35px;
+    background-color: transparent;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    float: left;
+    vertical-align:middle;
+    text-align: center;
+}
+
+.fileSize, .EditFileSize{
+    width: 50px;
+    height: 30px;
+    font-size: 14px;
+    color:white;
+    background-color: black;
+    display: inline-block;
+    position: relative;
+    top:5px;
+
+}
+.fileDetail,.EditFileDetail{
+    width:200px;
+    height: 36px;
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+    visibility: hidden;
+}
+
+.flexibleItems{
+    flex-grow: 2;
+    flex-wrap: nowrap;
+    flex-flow: column;
+    width: 100%;
+
+}
+.listOfResponsibility{
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    flex-wrap: nowrap;
+
+}
+
+
+
+.workexperienceTables table{
+    border-color: gray;
+    border-spacing: 2px;
+    padding: 5px;
+font-size: 13px;
+
+}
+
+.mainWorkExperienceTable th:not(.inputWorkExperienceTable *), .mainWorkExperienceTable td:not(.inputWorkExperienceTable *,.noBorderTD){
+
+    border-color: white;
+    border-width: 1px;
+    border-style: solid;
+    padding: 5px;
+    margin: 5px;
+
+}
+.hide{
+    display: none;
+}
+
+.mainWorkExperienceTable button{
+    margin-left: 10px;
+    color: white;
+    background-color: darkblue;
+    font-weight: bolder;
+    font-style: italic;
+}
+.mainWorkExperienceTable button:hover{
+    
+    background-color: white;
+    color:black;
+}
+
+.submit:hover{
+    background-color: black;
+   
+}
+
+    </style>
+
+
+<script src="CvWorkExperienceMaker/FirebaseConnection/FirebaseConfigFile.js"></script>
+
+<link   rel="stylesheet" href="/jquiery.css" />
+<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    
+
+    <div class="workexperienceTables">
+
+        <table class="mainWorkExperienceTable">
+
+                    
+            <thead>
+               <tr><th colspan="5"><button> Pendro Continue / Next </button> </th></tr>
+               <tr> <th>SN</th>  <th>Name Of Company</th>  <th colspan="3">Control</th> </tr>
+               <tr><td colspan="5"> 
+                <div  style="overflow:hidden; width:300px; height: 30px; display: inline-block;"> <marquee> Supported Date: (MM/DD/YYYY)  (DD/YYYY) (YYYY at different year). Supported File and Size (2 mb) pdf, jpg, jpeg, png. </marquee> </div> 
+
+               </td> 
+                </tr>
+            </thead>
+
+           <tbody class="tableDatabodyWorkExperience">
+              <tr class="sample"><td>Sample</td> <td>University of Bemiharm</td> <td>
+                 <img src="images/icons/3x/remove-red-eye-filled.png" width="20px" height="20px" class="show" >  <img src="images/icons/3x/visibility-off-filled.png" width="20px" height="20px"  class="hide"></td>
+                 <td>
+                    <img src="images/icons/3x/mode-edit-filled.png" width="20px" height="20px"  class="editEducation" ></td>
+
+                    <td>
+                        <img src="images/icons/3x/delete-filled.png" width="20px" height="20px" ></td>
+              </tr>
+
+                
+                   
+
+            
+            </tbody>
+    
+        <!---
+            <tbody class="tableDatabody">
+
+            </tbody>
+        -->
+        </table>
+
+        <table class="inputWorkExperienceTable">
+            <tr><th colspan="1"> <span style="text-decoration: underline; color:lightblue;font-weight: bolder;"> ADD WORK HISTORY / EXPERIENCE </span> </th> <td colspan="2"><i>  <span  class="workExpirenceError"></span> </i>  </td></tr>
+            <tr><th>Name Of Organisation / Firm / Company/ Industry </th>   <td><input type="text" class="nameOfWorkPlace" style="width:200px" placeholder="Name of Work Place"/></td>  </tr>
+
+            <tr><th>Organisation Office Address/Location :</th>  <td><input type="text"  class="location" placeholder="Location" style="width:200px"/></td>
+            
+            </tr>
+            <tr><th>Org. Website Address (Optional) :</th>  <td><input type="text"  class="websiteAddress" placeholder="Website Address" style="width:200px"/></td>
+            
+            </tr>
+
+
+            <tr><th>Position / Role : </th>   <td><input type="text"  class="position" style="width:200px" placeholder="Position" /> </td>
+                <td>
+                 <select class="PositionSelector" style="width:80px">
+                    
+                 
+                 </select>
+                
+                </td> 
+            </tr>
+            <tr><th>Start Date (DD/MM/YYYY)</th> <td><input type="text"  class="startDate" placeholder="DD/MM/YYYY" style="width:200px"/></td></tr>
+            <tr><th>End Date (DD/MM/YYYY)</th>   <td><input type="text"  class="endDate" placeholder="DD/MM/YYYY" style="width:200px"/></td>  <td> <input type="checkbox" class="tillDataCheckBoxWorkExperience" /> Till Date  </td></tr>
+           
+            <tr> <th colspan="3">Job Desc. / Responsibility  (<span class="rowcounter"  style="color:red;"> 0 </span> of 7):  120 characters each  row.   &nbsp; &nbsp;&nbsp; <span style="color:red;" class="characterCounter"></span></th>    </tr> 
+
+            <tr> <td colspan="2"><textarea type="text"  class="jobdesc" maxlength='120' style="width:100%;" placeholder="Job Desc.... max of 120 characters for each desc." ></textarea>
+                 <br> <div class="listOfResponsibility" heightUse="50" style="background-color: aquamarine; display:flex;"></div></td>
+                 <td style="vertical-align: top;">  <img src="images/icons/3x/add.png" class="addResponsiblityAtGUI" width="30px" height="30px" style="position:relative; top:0px" /> </td>
+                
+            </tr>
+           
+
+            <tr><td colspan="3"><h5 style="color:white;text-decoration: underline; font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; "><b>Provide Evidence of work in the above Organisation. <br> Confirmation Data  should capture your face with project / environment. <br>If Letter is used; Attestition letter should be letter Headed. </b></h5></td></tr>
+            <tr><th>Video / Project / Social Link <span fileCollectionState="Important">(Optional)</span> </th>  <td><input type="text" class="urlVideoFileAttched" placeholder="enter video link or github or youtube or social link here" /></td>
+            </tr>
+
+
+            <tr><th>Attach Video File (Optional) <span fileCollectionState="Important" style="font-size: 12px; display: inline-block; width:100px"><marquee>  MP4 Format , Max of <span class="guiVideoSize" style="color:red">5 </span> Mb size, Max-Length of <span class="guiVideoLength"  style="color:red">3</span> minute play-time.</marquee></span> <img src="images/icons/1x/play-circle-filled.png" class="addResponsiblityAtG playVideoFileForVideoDurationPurposseExtraction" width="20px" height="20px" style="position:relative; top:3px; visibility: hidden;" /> <span class="attachFileInputVideoProgressbar"></span></th> 
+                <td><label for="fileDataRawVideo" class="attachfile" > <img src="images/icons/3x/file-present.png" style="position:relative; top:5px" width="20px" height="20px" /> </label>    
+                    <div class="rawVideoFileDetail fileDetail">
+                        <input id="fileDataRawVideo" class="fileDataaRawVideo" accept="video/mp4,video/x-m4v" type="file"   VideoFilePlayerTimeAndFullTextDurationAndAcceptableMin="null/null/null" acceptableMinimumVideoDurationMinute="0" hidden /> 
+                       <!--  <input id="fileDataRawVideo" class="fileDataaRawVideo" accept="video/mp4,video/x-m4v,video/*" type="file" hidden /> --> 
+
+                        <textarea class="rawVideoFilenamSelected filenamSelected" readonly></textarea> <span class="rawVideoFileSize fileSize"></span> 
+                    </div>
+                </td>
+                <td>
+                    <img src="images/icons/3x/cleaning-services.png" width="20px" height="20px"  class="cleanSelectedVideoFile" style="visibility: hidden;"/> 
+
+                </td>
+            </tr>
+           <tr><th>Attach File  <span fileCollectionState="Important">(Optional) PDF/DOC/IMAGE</span> <img src="images/icons/3x/chrome-reader-mode.png" class="addResponsiblityAtG" width="20px" height="20px" style="position:relative; top:3px; visibility: hidden;" />   <span class="attachFileInputImageProgressbar"></span> </th> 
+                <td><label for="fileDataPDFImage" class="attachfile" > <img src="images/icons/3x/file-present.png" style="position:relative; top:5px" width="20px" height="20px" /> </label>
+                    <div class="pdfImageFileDetail fileDetail">
+                        <input id="fileDataPDFImage" class="fileDataaPDFIMAGE" accept="image/jpeg,image/jpg,image/png,application/doc,application/docx,application/pdf, application/vnd.ms-excel" type="file" hidden /> 
+                        <textarea class="pdfImagefilenamSelected filenamSelected" readonly></textarea> <span class="pdfimagefileSize fileSize"></span> 
+                    </div>
+                </td>
+                <td>
+                    <img src="images/icons/3x/cleaning-services.png" width="20px" height="20px"  class="cleanSelectedPDFImageFile"  style="visibility: hidden;"/> 
+
+                </td>
+            </tr>
+            
+            
+            <tr><td colspan="3"><hr></td></tr>
+            <tr><td colspan="2" style="text-align: center;"> <div  style="overflow:hidden; width:300px; height: 30px; display: inline-block;"><marquee>Supported Date: (MM/DD/YYYY)  (DD/YYYY) (YYYY at different year). Supported File and Size (2 mb) pdf, jpg, jpeg, png.  </marquee></div> 
+                <img src="images/icons/3x/add-business-filled.png" width="30px" height="30px"  class="submitWorkEpirence" style="float: right; "/> 
+                </td>
+            </tr>
+        </table>
+      </div>
+
+
+
+
+      
+      <input type="hidden" id="pageConnection"  USERID="1" CVID="12345677890754" SCHOOLID="1" SCHOLARSHIPID="" AGENCYID=""  JOBID=""  comment="If id is zero, means no id" hidden/>
+
+</body>
+
+
+<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase.js"></script>
+
+
+<script src="/jquery.js"></script>
+<script src="/jquery.ui.js"></script>
+
+<!-- 
+<script src="CvWorkExperienceMaker/PositionOptions.js">
+</script> -->
+
+<script src="CvWorkExperienceMaker/GetGUIInsertedJobDescriptionOperationMaker.js">
+</script>
+
+<script src="CvWorkExperienceMaker/manageResponsibilityAtGUI.js">
+</script>
+
+<script  type="module" src="CvWorkExperienceMaker/WorkExperience.js">
+</script>
+
+
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        td{
+            font-size: x-large;
+            color: white;
+          
+            
+        }
+        h2{
+            color: red;
+        }
+        .images{
+            display: inline-block;
+            margin-left: 35px;
+        }
+        .map{
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            z-index: 1;
+            opacity: 0.4;
+
+        }
+        #tintedglass{
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            background-color: black;
+            opacity: 0.6;
+        }
+        .formcontent{
+            z-index: 1;
+            position: relative;
+        }
+        #parent{
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 3;
+        }
+        h1{
+            color: white;
+        }
+        
+    </style>
+</head>
+<body>
+    <img src="../images/ebonyi map.jpg" alt="" class="map">
+    
+    <div id="tintedglass"></div>
+    <div id="parent">
+        <table>
+
+        <tr> <td style="text-align: center;"><div class="images"><img src="../images/pexels-isaac-udoye-337110795-16791339.jpg" alt="" width="400px" height="450px">Hotel</div></td>
+        <td style="text-align: center;"><div class="images"><img src="../images/pexels-pixabay-356056.jpg" alt="" width="400px" height="450px"></div>Firms</td>
+        <td style="text-align: center;"><div class="images"><img src="../images/IMG-20250509-WA0025.jpg" alt="" width="400px" height="450px"></div>Shops</td>
+        </tr>
+    </table>
+        <form action="get" class="formcontent">
+            
+                <table>
+                    <td><h2><u>Add Type</u></h2></td>
+                    <tr><td><br>Shops or stalls</td>
+                    <td><br><input type="radio" name="radio" id=""></td></tr>
+                    <tr><td><br>Hotels</td>
+                    <td><br><input type="radio" name="radio" id=""></td></tr>
+                    <tr><td><br>Private firms/Offices</td>
+                    <td><br><input type="radio" name="radio" id=""></td></tr>
+            <h1>Shops hotels and private business form</h1><br>
+            <td><h2><u>Input details</u></h2></td>
+            <tr><td><br>Attach brand logo</td>
+            <td><input type="file" name="" id=""></td></tr>
+            
+            <tr><td><br>Summary of services</td>
+            <td><input type="text" name="" id=""></td></tr>
+            <tr><td><br>Official Name</td>
+            <td>
+                <input type="text" name="" id="">
+            </td></tr>
+            <tr><td><br>Other names</td>
+            <td><input type="text" name="" id=""></td></tr>
+            <tr><td>
+               <br> Cac Registration number
+            </td>
+        <td><input type="number" name="" id=""></td></tr>
+        <tr><td><br>Address </td>
+        <td><input type="text number" name="" id=""></td></tr>
+        <tr><td><br>Photo </td>
+        <td><input type="file" name="" id=""></td></tr>
+        <tr><td><br>Attach video</td>
+        <td><input type="file" name="" id=""></td></tr>
+        <tr><td><br>Attach phot/Items</td>
+        <td><input type="file" name="" id=""></td>
+    <td><input type="file" name="" id=""></td></tr>
+    <tr><td><br>phone number 1</td>
+    <td><input type="number"></td></tr>
+    <tr><td><br>Phone number 2 if any </td>
+    <td><input type="number" name="" id=""></td></tr>
+    <tr><td><br>Business card</td>
+    <td><input type="file" name="" id=""></td></tr>
+    <tr><td><br> Map1</td>
+    <td><input type="file" name="" id=""></td></tr>
+    <tr><td><br> Map2</td>
+    <td><input type="file" name="" id=""></td></tr>
+    <tr><td> <br>Link map</td>
+    <td><input type="file" name="" id=""></td></tr>
+    <td><h2>Market</h2></td>
+    <tr>
+        <td>photo</td> <td> <input type="file" name="" id=""></td><td>price <input type="number" name="" id=""></td>
+        
+        </tr>
+        <tr>
+        <td>photo </td><td><input type="file" name="" id=""></td><td>price <input type="number" name="" id=""></td></tr>
+        <tr>
+        <td>photo</td><td> <input type="file" name="" id=""></td><td>price <input type="number\" name="" id=""></td></tr>
+       
+       
+            <tr><td><h2>Bank details</h2></td></tr>
+            
+        <tr><td>Account detail[visible to admin only]</td><td><input type="number" name="" id="" placeholder="account number"></td></tr>
+       <tr><td>Bank name</td><td><input type="text" name="" id="" placeholder="Bank name"></td></tr>
+       <tr><td><h2>Special event</h2></td>
+    <tr><td>Event detail </td><td><textarea name="" id=""></textarea></td></tr>  
+    </tr>
+    <tr><td>Date of event</td><td><input type="date" name="" id=""></td></tr>
+    <tr><td><input type="submit" name="" id=""></td></tr>
+</table>
+        </form>
+    </div>
+</body>
+</html>

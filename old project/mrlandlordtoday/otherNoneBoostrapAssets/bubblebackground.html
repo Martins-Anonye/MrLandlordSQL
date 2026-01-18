@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+body{
+    margin: 0;
+    overflow: hidden;
+    background: #0f2027;/*dark gradient background*/
+}
+
+.bubble{
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255);
+    animation: float 10s infinite;
+}
+
+@keyframes float{
+    0%{transform: translate(100vh, 50vh) scale(0.5);
+        opacity: 0;
+}
+50%{opacity: 1;
+    transform: translate(100vh,100vh) scale(0.5);
+}
+100%{transform: translate(-10vh) scale(1.2);
+        opacity: 0;}
+
+}
+</style>
+
+<body>
+   <script>
+    const numBubbles = 100;
+    for(var i = 0; i<numBubbles;i++){
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        const size = Math.random()* 40 + 10;
+        bubble.style.width =`${size}px`;
+        bubble.style.height =`${size}px`; 
+        bubble.style.left =`${Math.random()* 100}vw`;
+        bubble.style.animationDuration =`${5+ Math.random() * 10}s`;
+        document.body.appendChild(bubble);
+    }
+   </script> 
+</body>
+</html>

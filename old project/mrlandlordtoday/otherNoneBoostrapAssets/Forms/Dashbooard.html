@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+<style>
+#cont{
+    width: 1500px;
+    height: 1200px;
+    padding-top: 70px;
+    position: relative;
+    z-index: 2;
+}
+
+#cont1{
+    
+    background-color: white;
+    width: 650px;
+    height: 550px;
+    border-radius: 10px;
+padding-top: 30px;
+opacity: 1;
+}
+
+#both{
+    width: 500px;
+height: 20px;
+margin-bottom: 50px;
+padding-bottom: 25px;
+
+}
+
+#mr{
+    float: left;
+    color: blueviolet;
+    font-weight: bold;
+    width: 200px;
+    
+}
+
+#land{
+    width: 180px;
+
+}
+
+
+#all{
+    float: right;
+    width: 250px;
+    margin-top: 15px;
+}
+
+#house{
+    width: 380px;
+    height: 300px;
+    border: solid black 4px;
+    border-radius:  15px;
+}
+
+
+#listed{
+    width: 300px;
+}
+
+#listed1{
+    float: right;
+    border-color: blueviolet;
+}
+
+#liston{
+    float: left;
+    color: blueviolet;
+    font-weight: bold;
+}
+
+#down{
+    color: white;
+    background-color: blueviolet;
+    width: 100px;
+    float: left;
+    margin-left: 3px;
+}
+
+#share{
+    color: white;
+    background-color: blueviolet;
+    width: 100px;
+    float: right;
+    margin-right: 3px;
+}
+
+#downsha{
+    width: 310px;
+}
+
+.home{
+    background-color: blueviolet;
+    color: white;
+}
+</style>
+
+
+<link rel="stylesheet" href="../background/backgroundcss.css"/>
+
+
+</head>
+
+<body>
+   
+
+
+    <div id="backgroundDesign"   imageLocation="../IMAGES/house.png"></div>
+
+<div id="cont">
+
+    <center>
+        <form>
+
+ <div id="cont1">
+
+
+    <div id="both">
+
+      <div id="mr">
+         <img src="../../IMAGES/house.png" width="20px" height="20px">
+         <span id="land"> TENANTS DASHBOARD </span>
+       </div>  
+
+       <div id="all">
+         <button class="home">Home</button>
+         <button class="home">Contact</button>
+         <button class="home">Help</button>
+       </div>
+
+    </div>
+
+    <center>
+        <div id="house">
+            <img src="../../IMAGES/" width="100px" height="100px">
+        </div>
+   </center>
+
+</br>
+<div id="listed">
+<label id="liston">Listed on:</label>
+<input type="number" id="listed1" placeholder="Date">
+</div>
+
+</br></br>
+     <div id="downsha">
+      <button id="down">Download</button>
+      
+      <button id="down">Preview</button>
+
+      <button id="share"> <img src="../../IMAGES/share-filled.png" width="12px" height="12px"> Share</button>
+    </div>
+
+
+
+
+ </div>
+
+
+
+</form>
+
+</center>
+
+
+
+</div>
+
+
+<script src="../background/backgroundscript.js"></script>
+
+
+<script  src="fireconfiguration.js"> </script>
+<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase.js"></script>
+</body>
+</html>

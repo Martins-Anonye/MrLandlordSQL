@@ -151,4 +151,25 @@ On branch master
 nothing to commit, working tree clean.
 
 
-it 
+
+>>>git remote add origin https://github.com/Martins-Anonye/MrLandlordSQL.git
+error: remote origin already exists.
+That error means your repository already has a remote named origin. Git won’t let you add another one with the same name. You have a few options depending on what you want to do:
+
+🛠️ Check Current Remotes
+Run:
+
+
+git remote -v
+This will list the remotes. You’ll probably see something like:
+
+origin  https://github.com/SomeUser/SomeRepo.git (fetch)
+origin  https://github.com/SomeUser/SomeRepo.git (push)
+
+✅ Options to Fix
+1. If you want to replace the existing origin
+Use set-url instead of add:
+
+git remote set-url origin https://github.com/Martins-Anonye/MrLandlordSQL.git
+
+Now origin points to your new GitHub repo.

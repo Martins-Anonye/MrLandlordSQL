@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>government form</title>
+    <style>
+    .image{
+        width: auto;
+        height: auto;
+        display: inline-block;
+        margin-left: 35px;
+    }
+    #div4{
+        width: auto;
+        height: auto;
+        display: inline-block;
+        margin-left: 35px;
+
+
+        
+    }
+    #con{
+        width: auto;
+        height: auto;
+        position: relative;
+        z-index: 3;
+        padding-left: 20px;
+    }
+    #div5{
+        display: inline-block;
+        margin-left: 35px;
+    }
+    #con{
+       width: auto;
+       
+       opacity: 5;
+       height: auto;
+       position: relative;
+    
+
+    }
+    .formcontent{
+        opacity: 10;
+    }
+    td{
+        opacity: 50;
+        position: relative;
+    }
+    .bgimage{
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        opacity: 0.4;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .formcontent{
+        z-index: 1;
+        position: relative;
+    }
+    #Tintedglass{
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 2;
+        background-color: black;
+        opacity: 0.6;
+        position: fixed;
+    }
+    td{
+        color: white;
+        font-size: larger;
+        
+    }
+    h2{
+        color: lightblue;
+        font-size: x-large;
+
+        
+    }
+    h3{
+        color: lightblue;
+    }
+
+        
+    </style>
+</head>
+<body>
+    
+        <img src="../images/ebonyi map.jpg" class="bgimage">
+        <div id="Tintedglass"></div>
+    <div id="con"  > 
+        
+        <div class="image"><img src="../images/1746685134775.jpg" alt="" width="300px" height="300px"></div>
+        <div class="image"><img src="../images/1746685170696.jpg" alt="" width="300px" height="300px"></div>
+   <div id="div4"> <img src="../images/coat of arm.jpg" alt="" width="300px" height="300px" ></div>
+   <div id="div5" ><img src="../images/1746702240869.jpg" alt="" width="300px" height="300px"></div>
+
+    <form action="get" class="formcontent">
+        <table>
+            
+                
+        <h2><u>Office type</u></h2> 
+        
+    
+<tr><td>Federal level </td>
+<td><input type="radio" name="radio" id=""></td></tr>
+<tr><td>State level</td><td><input type="radio" name="radio" id=""></td></tr>
+<tr><td>Local government level </td><td><input type="radio" name="radio" id=""></td></tr>        
+                <tr>
+
+            <td><h3><u>Select office</u></h3></td> <td><select name="" id="">
+                
+                <option value="office of governor">office of governor</option>
+                <option value="">office of commissioner of education</option>
+                <option value="option ">office of minister for works</option>
+                <option value="">office of commissioner of health</option>
+            </select> </td>
+            
+        </tr>
+            <tr>
+           <td>Governors name</td>
+           <td><input type="text" name="Governors" id=""></td>
+            </tr>
+            <tr>
+                <u>
+                <td>Office name</td></u>
+                <td><input type="text" name="officename" id=""></td>
+            </tr>
+            <u>
+            <td><h3><u>Year entry</u></h3></td></u>
+            <tr>
+                <td>
+                    End year
+                </td>
+                <td><input type="number" name="endyear" id="" max="2100" min="1900"></td>
+            </tr>
+            <tr>
+                <td>still Active </td>
+               <td><input type="checkbox"still active" id="still active" ></td> 
+            </tr>
+            <u>
+            <td><h3><u>Achievements</u></h3></td>
+            </u>
+            <tr>
+                <td>Title</td>
+                <td><input type="text" name="titlename" id="ttilename"></td>
+            </tr>
+            <tr>
+                <td>Details of Achievements stated</td>
+                <td><input type="text" name="details"></td>
+            </tr>
+            <tr><td>Photo</td>
+                <td><input type="file" name="photo1" id="" > 
+                <input type="file" name="photo2" id=""></td>
+            </tr>
+            <tr><td>Add more Achievements</td>
+            <td><input type="text" name="" id=""></td></tr>
+            <u>
+            <td><h3><u>Event</u></h3></td>
+            </u>
+            <tr><td>Event title</td> <td>
+                <input type="text" name="Eventtitle" id="">
+            </td></tr>
+            <tr><td>Details</td>
+            <td><input type="text" name="Detail" id=""></td></tr>
+            <tr><td>Starts</td>
+                <td><input type="time"></td>
+            </tr>
+            <tr><td>Venue</td>
+             <td><input type="text" name="venue" id="venue"></td>
+            
+            </tr>
+            <tr><td>Photo</td>
+             <td><input type="file" name="photo1" id="" > 
+             <input type="file" name="photo2" id="" ></td>
+            
+            </tr>
+            <tr>
+                <td>Awards received</td>
+                <td><input type="text" name="Awardsreceived" id="Awardsreceived"></td>
+            </tr>
+            <tr><td>Add another event</td>
+            <td><input type="text" name="" id=""></td></tr>
+            <td><h3>News</h3></td>
+            <tr><td>Title</td><td><input type="text" name="" id=""></td></tr>
+<tr>       <td>News detail</td><td><input type="text" name="" id=""></td></tr>
+<tr>    <td>Post date</td><td><input type="date" name="" id=""></td></tr>
+<tr><td>News picture</td>
+<td><input type="file" name="" id=""></td></tr>
+            
+          <tr><td><input type="submit" name="" id=""></td></tr>
+
+    </form>
+    
+    
+    </div>
+</body>
+</html>
