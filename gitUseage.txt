@@ -3,6 +3,21 @@
 git init
 
 
+Tell git whom you are:
+
+Scope	Command Example	Where It Applies: example>>>
+
+System	e.g>>> git config --system user.email	All users on the machine
+Global	e.g>>> git config --global user.email	All repos for your user account
+Local	e.g>>> git config user.email	Only the current repo
+
+Usage:
+
+git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+  git config  user.email "ugomartinsdegreat@gmail.com"
+
 
 
 git add .
@@ -101,3 +116,22 @@ because  git add .gitignore has ensure file and folder to filter.
 git add .
 git commit -m "Updated solver logic"
 git push
+
+
+
+
+
+
+If error occure like:
+git status
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   .gitignore
+        modified:   gitUseage.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+solve by using:
+git add .
