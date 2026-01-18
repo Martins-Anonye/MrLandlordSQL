@@ -25,7 +25,7 @@ Usage:
 
 >>>>link your git online accout:
 
-git remote add origin https://github.com/username/quadratic_app.git
+git remote add origin https://github.com/Martins-Anonye/MrLandlordSQL.git
 
 
 
@@ -38,7 +38,7 @@ git commit -m "Initial commit: Special Update"
 
 
 
-
+>>>>> push to the server online remote account
 git branch -M main
 git push -u origin main
 
