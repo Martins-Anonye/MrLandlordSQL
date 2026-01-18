@@ -1,0 +1,64 @@
+look at the break down for it:  if any slot is used, 
+its capacity is reduced by one,
+ The remaining  capacity can be use to add  property, 
+ so  i want landlord to view list of puchased slot  
+ both used and unused ,
+ but if used: the remaining capacity must be one and above.
+
+
+
+
+ Perfect, I understand the logic you want:
+
+    Purchased slots belong to a landlord.
+
+    Each slot has a capacity (how many properties can be added).
+
+    Each time a slot is used, capacity is reduced by 1.
+
+    Landlords should see all their purchased slots (used and unused).
+
+    But if a slot is used, only show it if the remaining capacity ≥ 1 (so they can still add properties).
+
+
+
+    SQL Query Breakdown
+
+You already have:
+
+    slots.capacity → total capacity
+
+    used_slots → records of usage
+
+    purchased_slots → links landlord to slot
+
+So you can compute remaining capacity as:
+
+
+SELECT 
+    ps.id AS purchased_slot_id,
+    ps.status,
+    ps.date_purchased,
+    s.slot_title,
+    s.type,
+    s.capacity - COUNT(us.id) AS remaining_capacity
+FROM purchased_slots ps
+JOIN slots s ON ps.slot_id = s.id
+LEFT JOIN used_slots us ON ps.slot_id = us.slot_id AND ps.landlord_id = us.landlord_id
+WHERE ps.landlord_id = ? 
+  AND s.type = 'house'
+GROUP BY ps.id, ps.status, ps.date_purchased, s.slot_title, s.type, s.capacity
+HAVING remaining_capacity >= 1;
+
+
+
+
+Explanation
+
+    COUNT(us.id) counts how many times the slot has been used by that landlord.
+
+    s.capacity - COUNT(us.id) gives the remaining capacity.
+
+    HAVING remaining_capacity >= 1 ensures only slots with at least one capacity left are shown.
+
+    This query shows both unused slots (remaining capacity = full capacity) and used slots (remaining capacity reduced but ≥ 1).

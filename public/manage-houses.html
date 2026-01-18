@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Houses - House Agency</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 0; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .card { background-color: #ffffff; border: 2px solid #DAA520; border-radius: 8px; padding: 1rem; margin: 1rem 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .house-card { display: flex; justify-content: space-between; align-items: center; }
+    .house-info { flex: 1; }
+    button { background-color: #0000FF; color: #ffffff; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin-left: 0.5rem; }
+    button:hover { background-color: #DAA520; }
+    .delete { background-color: #FF0000; }
+    .delete:hover { background-color: #CC0000; }
+    @media (max-width: 768px) { .house-card { flex-direction: column; align-items: flex-start; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Manage Uploaded Houses</h2>
+    <button onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+    <div id="housesContainer"></div>
+  </div>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+
+    function loadHouses() {
+      fetch('/api/houses/my-houses', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(houses => {
+          const container = document.getElementById('housesContainer');
+          container.innerHTML = '';
+          houses.forEach(house => {
+            const card = document.createElement('div');
+            card.className = 'card house-card';
+            card.innerHTML = `
+              <div class="house-info">
+                <h3>${house.title}</h3>
+                <p>${house.description}</p>
+                <p>Location: ${house.location}, Price: ${house.price}</p>
+              </div>
+              <div>
+                <button onclick="editHouse(${house.id})">Edit</button>
+                <button class="delete" onclick="deleteHouse(${house.id})">Delete</button>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        });
+    }
+
+    function editHouse(id) {
+      // Implement edit functionality, perhaps redirect to edit page or modal
+      alert('Edit functionality not implemented yet');
+    }
+
+    function deleteHouse(id) {
+      if (confirm('Are you sure you want to delete this house?')) {
+        fetch(`/api/houses/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+          .then(res => res.json())
+          .then(data => {
+            alert(data.message);
+            loadHouses();
+          });
+      }
+    }
+
+    loadHouses();
+  </script>
+</body>
+</html>

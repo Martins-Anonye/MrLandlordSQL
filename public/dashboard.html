@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - House Agency</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 0; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .card { background-color: #ffffff; border: 2px solid #DAA520; border-radius: 8px; padding: 1rem; margin: 1rem 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .card h3 { color: #0000FF; margin-top: 0; }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 0.5rem; color: #0000FF; font-weight: bold; }
+    input, select, textarea, button { width: 100%; padding: 0.5rem; border: 1px solid #DAA520; border-radius: 4px; }
+    button { background-color: #0000FF; color: #ffffff; border: none; cursor: pointer; margin-top: 0.5rem; }
+    button:hover { background-color: #DAA520; }
+    .slot-card { background-color: #f9f9f9; border: 1px solid #DAA520; border-radius: 8px; padding: 1rem; margin: 0.5rem; display: inline-block; width: calc(33% - 1rem); min-width: 250px; vertical-align: top; }
+    .slot-card h4 { color: #0000FF; }
+    .slot-card p { margin: 0.5rem 0; }
+    .slots-grid { display: flex; flex-wrap: wrap; justify-content: space-between; }
+    @media (max-width: 768px) { .slot-card { width: calc(50% - 1rem); } }
+    @media (max-width: 480px) { .slot-card { width: 100%; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Dashboard</h2>
+    <button id="logoutBtn">Logout</button>
+    <div id="landlordSection" style="display: none;">
+      <div class="card">
+        <h3>Select Asset Manager</h3>
+        <div class="form-group">
+          <label for="assetManagerSelect">Asset Manager:</label>
+          <select id="assetManagerSelect">
+            <option value="">Select Asset Manager</option>
+          </select>
+        </div>
+        <button id="selectAssetManagerBtn">Select</button>
+      </div>
+
+      <div class="card">
+        <h3>Actions</h3>
+        <button onclick="window.location.href='/purchase-slot'">Purchase New Slot</button>
+        <button onclick="window.location.href='/purchased-slots'">View Purchased Slots</button>
+        <button onclick="window.location.href='/upload-house'">Upload House</button>
+        <button onclick="window.location.href='/upload-hotel'">Upload Hotel</button>
+        <button onclick="window.location.href='/manage-hotels'">Manage Uploaded Hotels</button>
+        <button onclick="window.location.href='/manage-houses'">Manage Uploaded Houses</button>
+        <button onclick="window.location.href='/used-slots'">View Used Slots</button>
+        <button onclick="window.location.href='/check-in'">View Check-ins</button>
+        <button onclick="window.location.href='/chat'">Chat</button>
+      </div>
+
+      <div class="card">
+        <h3>Available Room Sizes</h3>
+        <div id="roomSizesContainer"></div>
+      </div>
+    </div>
+
+      <div class="card">
+        <h3>Upload House</h3>
+        <form id="uploadForm" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="slotSelect">Select House Slot:</label>
+            <select name="slot_id" id="slotSelect" required>
+              <option value="">Select Slot</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="title">Title:</label>
+            <input type="text" name="title" id="title" required>
+          </div>
+          <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea name="description" id="description"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="location">Location:</label>
+            <input type="text" name="location" id="location" required>
+          </div>
+          <div class="form-group">
+            <label for="price">Price:</label>
+            <input type="number" name="price" id="price" step="0.01" required>
+          </div>
+          <h4>Room Sizes (sq ft)</h4>
+          <div class="form-group">
+            <label for="bedroom_size">Bedroom:</label>
+            <input type="number" name="bedroom_size" id="bedroom_size" step="0.01">
+          </div>
+          <div class="form-group">
+            <label for="living_room_size">Living Room:</label>
+            <input type="number" name="living_room_size" id="living_room_size" step="0.01">
+          </div>
+          <div class="form-group">
+            <label for="kitchen_size">Kitchen:</label>
+            <input type="number" name="kitchen_size" id="kitchen_size" step="0.01">
+          </div>
+          <div class="form-group">
+            <label for="bathroom_size">Bathroom:</label>
+            <input type="number" name="bathroom_size" id="bathroom_size" step="0.01">
+          </div>
+          <div class="form-group">
+            <label for="lawyer_fee">Lawyer Fee:</label>
+            <input type="number" name="lawyer_fee" id="lawyer_fee" step="0.01">
+          </div>
+          <div class="form-group">
+            <label for="agent_fee">Agent Fee:</label>
+            <input type="number" name="agent_fee" id="agent_fee" step="0.01">
+          </div>
+          <div class="form-group">
+            <label for="interior_quality">Interior Quality:</label>
+            <textarea name="interior_quality" id="interior_quality"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="exterior_quality">Exterior Quality:</label>
+            <textarea name="exterior_quality" id="exterior_quality"></textarea>
+          </div>
+          <h4>Images (up to 5, 1MB each)</h4>
+          <input type="file" name="images" accept="image/*" multiple>
+          <h4>Video (1, 5MB max)</h4>
+          <input type="file" name="video" accept="video/*">
+          <div id="resources"></div>
+          <button type="submit">Upload</button>
+        </form>
+    </div>
+    <div id="publicSection">
+      <div class="card">
+        <h3>Your Check-ins</h3>
+        <div id="checkins"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+
+    // Decode role from token (simple, in real app use proper decoding)
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (payload.role === 'landlord') {
+      document.getElementById('landlordSection').style.display = 'block';
+
+      // Load asset managers
+      fetch('/api/auth/asset-managers')
+        .then(res => res.json())
+        .then(managers => {
+          const select = document.getElementById('assetManagerSelect');
+          managers.forEach(m => {
+            const option = document.createElement('option');
+            option.value = m.id;
+            option.textContent = m.name;
+            select.appendChild(option);
+          });
+        });
+
+      // Load room sizes
+      fetch('/api/houses/room-sizes')
+        .then(res => res.json())
+        .then(sizes => {
+          const container = document.getElementById('roomSizesContainer');
+          if (sizes.length === 0) {
+            container.innerHTML = '<p>No room sizes defined yet.</p>';
+          } else {
+            const ul = document.createElement('ul');
+            sizes.forEach(size => {
+              const li = document.createElement('li');
+              li.textContent = `${size.name}: ${size.size_text}`;
+              ul.appendChild(li);
+            });
+            container.appendChild(ul);
+          }
+        });
+
+      // Select asset manager
+      document.getElementById('selectAssetManagerBtn').addEventListener('click', async () => {
+        const asset_manager_id = document.getElementById('assetManagerSelect').value;
+        if (!asset_manager_id) return alert('Select a manager');
+        const res = await fetch('/api/auth/select-asset-manager', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ asset_manager_id })
+        });
+        const data = await res.json();
+        alert(data.message);
+      });
+    }
+
+    // Load checkins for public
+    if (payload.role === 'public') {
+      fetch('/api/checkins', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          const checkinsDiv = document.getElementById('checkins');
+          data.forEach(checkin => {
+            const div = document.createElement('div');
+            div.innerHTML = `<p>House: ${checkin.title}, Time: ${checkin.checkin_time}</p>`;
+            checkinsDiv.appendChild(div);
+          });
+        });
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      localStorage.removeItem('token');
+      window.location.href = '/';
+    });
+  </script>
+</body>
+</html>

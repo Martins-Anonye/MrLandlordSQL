@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotels - House Agency</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 0; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .card { background-color: #ffffff; border: 2px solid #DAA520; border-radius: 8px; padding: 1rem; margin: 1rem 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .hotel-card { display: flex; justify-content: space-between; align-items: center; }
+    .hotel-card img { width: 200px; height: 150px; object-fit: cover; }
+    .hotel-details { flex: 1; margin-left: 1rem; }
+    button { background-color: #0000FF; color: #ffffff; border: none; padding: 0.5rem; cursor: pointer; border-radius: 4px; }
+    button:hover { background-color: #DAA520; }
+    #map { height: 400px; width: 100%; }
+  </style>
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+</head>
+<body>
+  <div class="container">
+    <h2>Available Hotels</h2>
+    <button onclick="window.location.href='/login'">Login</button>
+    <div id="hotelsContainer"></div>
+  </div>
+  <script>
+    const token = localStorage.getItem('token');
+
+    function loadHotels() {
+      fetch('/api/houses/hotels')
+        .then(res => res.json())
+        .then(hotels => {
+          const container = document.getElementById('hotelsContainer');
+          hotels.forEach(hotel => {
+            const card = document.createElement('div');
+            card.className = 'card hotel-card';
+            card.innerHTML = `
+              <img src="/${hotel.images[0]}" alt="${hotel.name}">
+              <div class="hotel-details">
+                <h3>${hotel.name}</h3>
+                <p>${hotel.description}</p>
+                <p>Location: ${hotel.location}</p>
+                <p>Price per night: $${hotel.price_per_night}</p>
+                <p>Amenities: ${JSON.parse(hotel.amenities).join(', ')}</p>
+                <button onclick="bookHotel(${hotel.id})">Book Now</button>
+                <button onclick="viewOnMap(${hotel.latitude}, ${hotel.longitude})">View on Map</button>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        });
+    }
+
+    function bookHotel(hotelId) {
+      if (!token) return alert('Please login to book');
+      const checkin = prompt('Check-in date (YYYY-MM-DD)');
+      const checkout = prompt('Check-out date (YYYY-MM-DD)');
+      if (checkin && checkout) {
+        // Initiate payment
+        fetch('/api/payments/initiate-hotel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ hotelId, checkin_date: checkin, checkout_date: checkout, gateway: 'paystack' })
+        })
+        .then(res => res.json())
+        .then(paymentData => {
+          if (paymentData.authorization_url) {
+            window.location.href = paymentData.authorization_url;
+          } else {
+            alert('Payment initiation failed');
+          }
+        });
+      }
+    }
+
+    function viewOnMap(lat, lng) {
+      const mapDiv = document.createElement('div');
+      mapDiv.id = 'map';
+      document.body.appendChild(mapDiv);
+      const map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 15,
+        center: { lat, lng }
+      });
+      new google.maps.Marker({ position: { lat, lng }, map });
+    }
+
+    loadHotels();
+  </script>
+</body>
+</html>

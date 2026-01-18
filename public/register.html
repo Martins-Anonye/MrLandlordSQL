@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - House Agency</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    form { background-color: #f0f0f0; padding: 2rem; border-radius: 8px; }
+    input { display: block; margin: 0.5rem 0; padding: 0.5rem; width: 100%; }
+    button { background-color: #0000ff; color: #ffffff; padding: 0.5rem; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <form id="registerForm">
+    <h2>Register</h2>
+    <input type="text" id="name" placeholder="Name" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <input type="tel" id="phone" placeholder="Phone">
+    <select id="role">
+      <option value="public">Public</option>
+      <option value="landlord">Landlord</option>
+    </select>
+    <button type="submit">Register</button>
+  </form>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const phone = document.getElementById('phone').value;
+      const role = document.getElementById('role').value;
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, phone, role })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert('Registered successfully');
+        window.location.href = '/login';
+      } else {
+        alert(data.error);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+
+
+git init
+
+
+
+
+git add .
+git commit -m "Initial commit: Special Update"
+
+
+
+
+
+git remote add origin https://github.com/username/quadratic_app.git
+
+
+
+
+git branch -M main
+git push -u origin main
+
+
+
+
+
+
+
+
+
+subsequent Update:
+git add .
+git commit -m "Updated solver logic"
+git push
+
+
+
+
+
+
+ignore some files from been uploaded:
+
+create a file name it .gitignore
+
+
+# Ignore Python virtual environment
+venv/
+
+# Ignore compiled Python files
+*.pyc
+__pycache__/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE/project settings
+.idea/
+.vscode/
+
+# Ignore logs
+*.log
+
+
+
+
+
+
+
+add the ignore so as to remember file to ignore:
+
+git add .gitignore
+git commit -m "Add .gitignore to ignore unnecessary files"
+git push
+
+
+
+
+
+
+
+
+how to use git add .   and make sure it ignore those specified files and folders
+
+
+step 1:
+Check what Git sees:
+git add .gitignore
+git status
+
+
+
+
+Add every thing ion git but will not upload those listed in ignore, 
+because  git add .gitignore has ensure file and folder to filter.
+
+
+
+
+
+git add .
+git commit -m "Updated solver logic"
+git push

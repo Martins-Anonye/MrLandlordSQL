@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - House Agency</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 0; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .card { background-color: #ffffff; border: 2px solid #DAA520; border-radius: 8px; padding: 1rem; margin: 1rem 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .card h3 { color: #0000FF; margin-top: 0; }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 0.5rem; color: #0000FF; font-weight: bold; }
+    input, select, textarea, button { width: 100%; padding: 0.5rem; border: 1px solid #DAA520; border-radius: 4px; }
+    button { background-color: #0000FF; color: #ffffff; border: none; cursor: pointer; margin-top: 0.5rem; }
+    button:hover { background-color: #DAA520; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { border: 1px solid #DAA520; padding: 0.5rem; text-align: left; }
+    th { background-color: #f0f0f0; color: #0000FF; }
+    .user-card { background-color: #ffffff; border: 1px solid #DAA520; border-radius: 4px; padding: 0.5rem; margin: 0.5rem 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Admin Panel</h2>
+    <button id="logoutBtn">Logout</button>
+    <div class="card">
+      <h3>Create New Admin</h3>
+      <form id="createAdminForm">
+        <div class="form-group">
+          <label for="adminName">Name:</label>
+          <input type="text" id="adminName" required>
+        </div>
+        <div class="form-group">
+          <label for="adminEmail">Email:</label>
+          <input type="email" id="adminEmail" required>
+        </div>
+        <div class="form-group">
+          <label for="adminPassword">Password:</label>
+          <input type="password" id="adminPassword" required>
+        </div>
+        <button type="submit">Create Admin</button>
+      </form>
+    </div>
+    <div class="card">
+      <h3>Users</h3>
+      <div id="usersContainer"></div>
+    </div>
+    <div class="card">
+      <h3>Check-ins</h3>
+      <table id="checkinsTable">
+        <thead>
+          <tr><th>User</th><th>House</th><th>Time</th><th>Image</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Payouts</h3>
+      <table id="payoutsTable">
+        <thead>
+          <tr><th>Landlord</th><th>Amount</th><th>Action</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Slot Management</h3>
+      <form id="createSlotForm">
+        <div class="form-group">
+          <label for="slotType">Type:</label>
+          <select id="slotType">
+            <option value="house">House</option>
+            <option value="hotel">Hotel</option>
+            <option value="shop">Shop</option>
+            <option value="car">Car</option>
+            <option value="bicycle">Bicycle</option>
+            <option value="motocycle">Motocycle</option>
+            <option value="baby">Baby Market</option>
+            <option value="general">General Public Market</option>
+            <option value="land">Land Market</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="slotTitle">Slot Title:</label>
+          <input type="text" id="slotTitle" required>
+        </div>
+        <div class="form-group">
+          <label for="slotDescription">Slot Description:</label>
+          <textarea id="slotDescription"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="slotCapacity">Capacity:</label>
+          <input type="number" id="slotCapacity" required>
+        </div>
+        <div class="form-group">
+          <label for="slotDuration">Duration (days):</label>
+          <input type="number" id="slotDuration" required>
+        </div>
+        <div class="form-group">
+          <label for="slotPrice">Price:</label>
+          <input type="number" id="slotPrice" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label for="slotTax">Tax:</label>
+          <input type="number" id="slotTax" step="0.01">
+        </div>
+        <button type="submit">Create Slot</button>
+      </form>
+      <table id="slotsTable">
+        <thead>
+          <tr><th>Type</th><th>Title</th><th>Description</th><th>Capacity</th><th>Duration</th><th>Price</th><th>Tax</th><th>Status</th><th>Landlord</th><th>Purchase Date</th><th>Actions</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Room Sizes</h3>
+      <form id="roomSizeForm">
+        <div class="form-group">
+          <label for="roomName">Name:</label>
+          <input type="text" id="roomName" required>
+        </div>
+        <div class="form-group">
+          <label for="roomSizeText">Size Text:</label>
+          <input type="text" id="roomSizeText" required>
+        </div>
+        <button type="submit">Add Room Size</button>
+      </form>
+      <table id="roomSizesTable">
+        <thead>
+          <tr><th>Name</th><th>Size Text</th><th>Actions</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Special Resources Management</h3>
+      <div id="categoriesContainer"></div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+
+    // Load checkins
+    fetch('/api/admin/checkins', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.querySelector('#checkinsTable tbody');
+        data.forEach(checkin => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${checkin.name}</td><td>${checkin.title}</td><td>${checkin.checkin_time}</td><td><img src="/${checkin.image}" width="50"></td>`;
+          tbody.appendChild(tr);
+        });
+      });
+
+    // Load payouts
+    fetch('/api/admin/payouts', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.querySelector('#payoutsTable tbody');
+        data.forEach(payout => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${payout.landlord_id}</td><td>${payout.amount}</td><td><button onclick="processPayout(${payout.id})">Process</button></td>`;
+          tbody.appendChild(tr);
+        });
+      });
+
+    function processPayout(id) {
+      fetch(`/api/admin/payout/${id}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(data => alert(data.message));
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      localStorage.removeItem('token');
+      window.location.href = '/';
+    });
+
+    // Create admin
+    document.getElementById('createAdminForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('adminName').value;
+      const email = document.getElementById('adminEmail').value;
+      const password = document.getElementById('adminPassword').value;
+      const res = await fetch('/api/admin/create-admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ name, email, password })
+      });
+      const data = await res.json();
+      alert(data.message);
+    });
+
+    // Load users
+    fetch('/api/admin/users', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(users => {
+        const container = document.getElementById('usersContainer');
+        users.forEach(u => {
+          const userCard = document.createElement('div');
+          userCard.className = 'user-card';
+          userCard.innerHTML = `
+            <p><strong>Email:</strong> ${u.email}</p>
+            <p><strong>Name:</strong> ${u.name || 'N/A'}</p>
+            <p><strong>Role:</strong> ${u.role}</p>
+          `;
+          container.appendChild(userCard);
+        });
+      });
+
+    // Load slots
+    function loadSlots() {
+      fetch('/api/admin/slots', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(slots => {
+          const tbody = document.querySelector('#slotsTable tbody');
+          tbody.innerHTML = '';
+          slots.forEach(slot => {
+            const status = slot.purchase_status === 'active' ? 'Purchased' : 'Available';
+            const purchaseDate = slot.date_purchased ? new Date(slot.date_purchased).toLocaleDateString() : '-';
+            const row = `<tr>
+              <td>${slot.type}</td>
+              <td>${slot.slot_title}</td>
+              <td>${slot.slot_description || ''}</td>
+              <td>${slot.capacity}</td>
+              <td>${slot.duration}</td>
+              <td>${slot.price}</td>
+              <td>${slot.tax || ''}</td>
+              <td>${status}</td>
+              <td>${slot.landlord_name || 'Available'}</td>
+              <td>${purchaseDate}</td>
+              <td>
+                <button onclick="editSlot(${slot.id})">Edit</button>
+                <button onclick="deleteSlot(${slot.id})">Delete</button>
+                ${slot.purchase_status === 'active' ? `<button onclick="managePurchasedSlot(${slot.id}, '${slot.landlord_name}')">Manage</button>` : ''}
+              </td>
+            </tr>`;
+            tbody.innerHTML += row;
+          });
+        });
+    }
+    loadSlots();
+
+    // Create slot
+    document.getElementById('createSlotForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const type = document.getElementById('slotType').value;
+      const slot_title = document.getElementById('slotTitle').value;
+      const slot_description = document.getElementById('slotDescription').value;
+      const capacity = document.getElementById('slotCapacity').value;
+      const duration = document.getElementById('slotDuration').value;
+      const price = document.getElementById('slotPrice').value;
+      const tax = document.getElementById('slotTax').value;
+      const res = await fetch('/api/admin/slots', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ type, slot_title, slot_description, capacity, duration, price, tax })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message);
+      } else {
+        alert('Error: ' + (data.error || 'Unknown error'));
+      }
+      loadSlots();
+    });
+
+    // Edit slot (simple prompt)
+    window.editSlot = async (id) => {
+      const type = prompt('Type');
+      const slot_title = prompt('Slot Title');
+      const slot_description = prompt('Slot Description');
+      const capacity = prompt('Capacity');
+      const duration = prompt('Duration');
+      const price = prompt('Price');
+      const tax = prompt('Tax');
+      if (type && slot_title && capacity && duration && price) {
+        const res = await fetch(`/api/admin/slots/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ type, slot_title, slot_description, capacity, duration, price, tax })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert(data.message);
+        } else {
+          alert('Error: ' + (data.error || 'Unknown error'));
+        }
+        loadSlots();
+      }
+    };
+
+    // Delete slot
+    window.deleteSlot = async (id) => {
+      if (confirm('Delete slot?')) {
+        const res = await fetch(`/api/admin/slots/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        alert(data.message);
+        loadSlots();
+      }
+    };
+
+    // Manage purchased slot
+    window.managePurchasedSlot = async (slotId, landlordName) => {
+      const action = prompt(`Manage slot purchased by ${landlordName}. Options:\n1. Cancel purchase\n2. View usage\nEnter 1 or 2:`);
+      
+      if (action === '1') {
+        if (confirm(`Cancel slot purchase for ${landlordName}? This will make the slot available again.`)) {
+          const res = await fetch(`/api/admin/purchased-slots/${slotId}/cancel`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await res.json();
+          alert(data.message);
+          loadSlots();
+        }
+      } else if (action === '2') {
+        // View slot usage - redirect to used slots or show details
+        alert('Slot usage view not implemented yet. Check used slots page.');
+      }
+    };
+
+    // Load room sizes
+    function loadRoomSizes() {
+      fetch('/api/admin/room-sizes', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(sizes => {
+          const tbody = document.querySelector('#roomSizesTable tbody');
+          tbody.innerHTML = '';
+          sizes.forEach(size => {
+            const row = `<tr>
+              <td>${size.name}</td>
+              <td>${size.size_text}</td>
+              <td>
+                <button onclick="editRoomSize(${size.id})">Edit</button>
+                <button onclick="deleteRoomSize(${size.id})">Delete</button>
+              </td>
+            </tr>`;
+            tbody.innerHTML += row;
+          });
+        });
+    }
+    loadRoomSizes();
+
+    // Add room size
+    document.getElementById('roomSizeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('roomName').value;
+      const size_text = document.getElementById('roomSizeText').value;
+      const res = await fetch('/api/admin/room-sizes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ name, size_text })
+      });
+      const data = await res.json();
+      alert(data.message);
+      if (res.ok) {
+        document.getElementById('roomSizeForm').reset();
+        loadRoomSizes();
+      }
+    });
+
+    // Edit room size
+    window.editRoomSize = async (id) => {
+      const name = prompt('Name');
+      const size_text = prompt('Size Text');
+      if (name && size_text) {
+        const res = await fetch(`/api/admin/room-sizes/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ name, size_text })
+        });
+        const data = await res.json();
+        alert(data.message);
+        loadRoomSizes();
+      }
+    };
+
+    // Delete room size
+    window.deleteRoomSize = async (id) => {
+      if (confirm('Delete room size?')) {
+        const res = await fetch(`/api/admin/room-sizes/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        alert(data.message);
+        loadRoomSizes();
+      }
+    };
+
+    // Load categories and items
+    function loadCategories() {
+      fetch('/api/admin/categories', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(categories => {
+          const container = document.getElementById('categoriesContainer');
+          container.innerHTML = '';
+          categories.forEach(cat => {
+            const catDiv = document.createElement('div');
+            catDiv.innerHTML = `<h4>${cat.name}</h4>
+              <form class="addItemForm" data-cat-id="${cat.id}">
+                <input type="text" placeholder="New item name" required>
+                <button type="submit">Add Item</button>
+              </form>
+              <ul>`;
+            cat.items.forEach(item => {
+              catDiv.innerHTML += `<li>${item.name} <button onclick="deleteItem(${cat.id}, ${item.id})">Delete</button></li>`;
+            });
+            catDiv.innerHTML += `</ul>`;
+            container.appendChild(catDiv);
+          });
+
+          // Add event listeners for add item forms
+          document.querySelectorAll('.addItemForm').forEach(form => {
+            form.addEventListener('submit', async (e) => {
+              e.preventDefault();
+              const catId = e.target.dataset.catId;
+              const name = e.target.querySelector('input').value;
+              const res = await fetch(`/api/admin/categories/${catId}/items`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ name })
+              });
+              const data = await res.json();
+              alert(data.message);
+              if (res.ok) {
+                e.target.reset();
+                loadCategories();
+              }
+            });
+          });
+        });
+    }
+    loadCategories();
+
+    // Delete item
+    window.deleteItem = async (catId, itemId) => {
+      if (confirm('Delete item?')) {
+        const res = await fetch(`/api/admin/categories/${catId}/items/${itemId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        alert(data.message);
+        loadCategories();
+      }
+    };
+  </script>
+</body>
+</html>

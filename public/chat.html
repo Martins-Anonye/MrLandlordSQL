@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat - House Agency</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 0; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .card { background-color: #ffffff; border: 2px solid #DAA520; border-radius: 8px; padding: 1rem; margin: 1rem 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    #chatMessages { height: 300px; overflow-y: scroll; border: 1px solid #DAA520; padding: 0.5rem; }
+    #messageInput { width: 80%; padding: 0.5rem; }
+    button { background-color: #0000FF; color: #ffffff; border: none; padding: 0.5rem; cursor: pointer; border-radius: 4px; }
+    button:hover { background-color: #DAA520; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Chat</h2>
+    <button onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+    <div class="card">
+      <h3>Chat with User</h3>
+      <select id="userSelect"></select>
+      <div id="chatMessages"></div>
+      <input type="text" id="messageInput" placeholder="Type message...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+
+    let selectedUserId = null;
+
+    function loadUsers() {
+      // Load users for chat
+      fetch('/api/admin/users', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(users => {
+        const select = document.getElementById('userSelect');
+        users.forEach(user => {
+          const option = document.createElement('option');
+          option.value = user.id;
+          option.textContent = user.name || user.email;
+          select.appendChild(option);
+        });
+      });
+    }
+
+    document.getElementById('userSelect').addEventListener('change', (e) => {
+      selectedUserId = e.target.value;
+      loadMessages();
+    });
+
+    function loadMessages() {
+      if (!selectedUserId) return;
+      fetch(`/api/houses/chat/${selectedUserId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(messages => {
+        const container = document.getElementById('chatMessages');
+        container.innerHTML = '';
+        messages.forEach(msg => {
+          const div = document.createElement('div');
+          div.textContent = `${msg.sender_id === parseInt(atob(token.split('.')[1]).id) ? 'You' : 'Them'}: ${msg.message}`;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    function sendMessage() {
+      if (!selectedUserId) return alert('Select a user');
+      const message = document.getElementById('messageInput').value;
+      if (!message) return;
+      fetch('/api/houses/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ receiver_id: selectedUserId, message })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('messageInput').value = '';
+        loadMessages();
+      });
+    }
+
+    loadUsers();
+  </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Hotel - House Agency</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 0; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .card { background-color: #ffffff; border: 2px solid #DAA520; border-radius: 8px; padding: 1rem; margin: 1rem 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 0.5rem; color: #0000FF; font-weight: bold; }
+    input, select, textarea, button { width: 100%; padding: 0.5rem; border: 1px solid #DAA520; border-radius: 4px; }
+    button { background-color: #0000FF; color: #ffffff; border: none; cursor: pointer; margin-top: 0.5rem; }
+    button:hover { background-color: #DAA520; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Upload Hotel</h2>
+    <button onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+    <div class="card">
+      <h3>Select Purchased Hotel Slot</h3>
+      <select id="slotSelect"></select>
+    </div>
+    <div class="card">
+      <h3>Upload Hotel</h3>
+      <form id="uploadForm" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="name">Hotel Name:</label>
+          <input type="text" id="name" required>
+        </div>
+        <div class="form-group">
+          <label for="description">Description:</label>
+          <textarea id="description"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="location">Location:</label>
+          <input type="text" id="location" required>
+        </div>
+        <div class="form-group">
+          <label for="latitude">Latitude:</label>
+          <input type="number" id="latitude" step="0.000001" required>
+        </div>
+        <div class="form-group">
+          <label for="longitude">Longitude:</label>
+          <input type="number" id="longitude" step="0.000001" required>
+        </div>
+        <div class="form-group">
+          <label for="price_per_night">Price per Night:</label>
+          <input type="number" id="price_per_night" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label for="amenities">Amenities (comma separated):</label>
+          <input type="text" id="amenities" placeholder="WiFi, Pool, Gym">
+        </div>
+        <div class="form-group">
+          <label for="images">Images:</label>
+          <input type="file" id="images" multiple accept="image/*">
+        </div>
+        <div class="form-group">
+          <label for="video">Video:</label>
+          <input type="file" id="video" accept="video/*">
+        </div>
+        <button type="submit">Upload Hotel</button>
+      </form>
+    </div>
+  </div>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+
+    function loadSlots() {
+      fetch('/api/houses/my-slots', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(slots => {
+          const select = document.getElementById('slotSelect');
+          select.innerHTML = '<option value="">Select Slot</option>';
+          slots.filter(s => s.type === 'hotel').forEach(slot => {
+            const option = document.createElement('option');
+            option.value = slot.id;
+            option.textContent = `${slot.slot_title || slot.type} - Expires: ${new Date(slot.expires_at).toLocaleDateString()}`;
+            select.appendChild(option);
+          });
+        });
+    }
+
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const slotId = document.getElementById('slotSelect').value;
+      if (!slotId) return alert('Select a slot');
+      const formData = new FormData();
+      formData.append('slot_id', slotId);
+      formData.append('name', document.getElementById('name').value);
+      formData.append('description', document.getElementById('description').value);
+      formData.append('location', document.getElementById('location').value);
+      formData.append('latitude', document.getElementById('latitude').value);
+      formData.append('longitude', document.getElementById('longitude').value);
+      formData.append('price_per_night', document.getElementById('price_per_night').value);
+      formData.append('amenities', JSON.stringify(document.getElementById('amenities').value.split(',').map(a => a.trim())));
+      const images = document.getElementById('images').files;
+      for (let i = 0; i < images.length; i++) formData.append('images', images[i]);
+      const video = document.getElementById('video').files[0];
+      if (video) formData.append('video', video);
+
+      const res = await fetch('/api/houses/upload-hotel', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      alert(data.message);
+    });
+
+    loadSlots();
+  </script>
+</body>
+</html>

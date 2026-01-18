@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Used Slots - House Agency</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 0; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .card { background-color: #ffffff; border: 2px solid #DAA520; border-radius: 8px; padding: 1rem; margin: 1rem 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .slot-card { display: flex; justify-content: space-between; align-items: center; }
+    .slot-info { flex: 1; }
+    @media (max-width: 768px) { .slot-card { flex-direction: column; align-items: flex-start; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>My Used Slots</h2>
+    <button onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+    
+    <div class="card">
+      <h3>Filters</h3>
+      <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <label>Type:</label>
+          <select id="filterType">
+            <option value="">All</option>
+            <option value="house">House</option>
+            <option value="shop">Shop</option>
+            <option value="car">Car</option>
+            <option value="bicycle">Bicycle</option>
+            <option value="motocycle">Motocycle</option>
+            <option value="baby">Baby</option>
+            <option value="general">General</option>
+            <option value="land">Land</option>
+          </select>
+        </div>
+        <div>
+          <label>Capacity:</label>
+          <input type="number" id="filterCapacity" placeholder="Min">
+        </div>
+        <div>
+          <label>Duration (days):</label>
+          <input type="number" id="filterDuration" placeholder="Min">
+        </div>
+        <div>
+          <label>Price:</label>
+          <input type="number" id="filterPrice" placeholder="Min">
+        </div>
+        <div>
+          <label>Tax:</label>
+          <input type="number" id="filterTax" placeholder="Min">
+        </div>
+        <div>
+          <label>Expiry Status:</label>
+          <select id="filterExpiry">
+            <option value="">All</option>
+            <option value="expired">Expired</option>
+            <option value="active">Active</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    
+    <div id="usedSlotsContainer"></div>
+  </div>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+
+    let allSlots = [];
+
+    function loadUsedSlots() {
+      fetch('/api/houses/my-used-slots', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(slots => {
+          allSlots = slots;
+          applyFilters();
+        });
+    }
+
+    function applyFilters() {
+      const type = document.getElementById('filterType').value;
+      const capacity = parseInt(document.getElementById('filterCapacity').value) || 0;
+      const duration = parseInt(document.getElementById('filterDuration').value) || 0;
+      const price = parseFloat(document.getElementById('filterPrice').value) || 0;
+      const tax = parseFloat(document.getElementById('filterTax').value) || 0;
+      const expiry = document.getElementById('filterExpiry').value;
+
+      const filtered = allSlots.filter(slot => {
+        const isExpired = slot.next_expiry && new Date(slot.next_expiry) < new Date();
+        return (!type || slot.type === type) &&
+               (capacity === 0 || slot.capacity >= capacity) &&
+               (duration === 0 || slot.duration >= duration) &&
+               (price === 0 || slot.price >= price) &&
+               (tax === 0 || (slot.tax || 0) >= tax) &&
+               (!expiry || (expiry === 'expired' && isExpired) || (expiry === 'active' && !isExpired));
+      });
+
+      displaySlots(filtered);
+    }
+
+    function displaySlots(slots) {
+      const container = document.getElementById('usedSlotsContainer');
+      container.innerHTML = '';
+      slots.forEach(slot => {
+        const isExpired = slot.next_expiry && new Date(slot.next_expiry) < new Date();
+        const card = document.createElement('div');
+        card.className = 'card slot-card';
+        card.innerHTML = `
+          <div class="slot-info">
+            <h3>${slot.slot_title || slot.type}</h3>
+            <p>${slot.slot_description || ''}</p>
+            <p>Type: ${slot.type}, Capacity: ${slot.capacity}, Duration: ${slot.duration} days, Price: ${slot.price}, Tax: ${slot.tax || 0}</p>
+            <p>Used At: ${new Date(slot.used_at).toLocaleString()}</p>
+            <p>Expires: ${slot.next_expiry ? new Date(slot.next_expiry).toLocaleString() : 'N/A'}</p>
+            <p>Status: ${isExpired ? 'Expired' : 'Active'}</p>
+            <p>House: ${slot.house_title || 'N/A'}</p>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Add event listeners for filters
+    document.getElementById('filterType').addEventListener('change', applyFilters);
+    document.getElementById('filterCapacity').addEventListener('input', applyFilters);
+    document.getElementById('filterDuration').addEventListener('input', applyFilters);
+    document.getElementById('filterPrice').addEventListener('input', applyFilters);
+    document.getElementById('filterTax').addEventListener('input', applyFilters);
+    document.getElementById('filterExpiry').addEventListener('change', applyFilters);
+
+    loadUsedSlots();
+  </script>
+</body>
+</html>

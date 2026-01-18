@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Special Resources - House Agency</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 0; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .card { background-color: #ffffff; border: 2px solid #DAA520; border-radius: 8px; padding: 1rem; margin: 1rem 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 0.5rem; color: #0000FF; font-weight: bold; }
+    input, button { width: 100%; padding: 0.5rem; border: 1px solid #DAA520; border-radius: 4px; }
+    button { background-color: #0000FF; color: #ffffff; border: none; cursor: pointer; margin-top: 0.5rem; }
+    button:hover { background-color: #DAA520; }
+    .amenity { margin: 0.5rem 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Add Special Resources to House</h2>
+    <button onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+    <div class="card">
+      <h3>Select Special Resources</h3>
+      <div id="resourcesList"></div>
+      <button id="saveBtn">Save Resources</button>
+    </div>
+  </div>
+  <script>
+    const token = localStorage.getItem('token');
+    const houseId = localStorage.getItem('lastHouseId');
+    if (!token || !houseId) window.location.href = '/login';
+
+    function loadResources() {
+      fetch('/api/admin/categories')
+        .then(res => res.json())
+        .then(categories => {
+          const list = document.getElementById('resourcesList');
+          categories.forEach(cat => {
+            const catDiv = document.createElement('div');
+            catDiv.innerHTML = `<h4>${cat.name}</h4>`;
+            const itemsDiv = document.createElement('div');
+            cat.items.forEach(item => {
+              const label = document.createElement('label');
+              label.innerHTML = `<input type="checkbox" value="${item.id}"> ${item.name}`;
+              itemsDiv.appendChild(label);
+              itemsDiv.appendChild(document.createElement('br'));
+            });
+            catDiv.appendChild(itemsDiv);
+            list.appendChild(catDiv);
+          });
+        });
+    }
+
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      const selected = Array.from(document.querySelectorAll('#resourcesList input:checked')).map(cb => cb.value);
+      const res = await fetch('/api/houses/resources', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ houseId, resources: selected })
+      });
+      const data = await res.json();
+      alert(data.message);
+      if (res.ok) {
+        localStorage.removeItem('lastHouseId');
+        window.location.href = '/dashboard';
+      }
+    });
+
+    loadResources();
+  </script>
+</body>
+</html>

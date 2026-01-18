@@ -1,0 +1,14 @@
+A default super admin has been created in the database with:
+
+Email: admin@houseagency.com
+Password: admin  or admin123
+The admin panel now includes a form to create additional admins. Only existing admins can create new ones. The README has been updated with the default credentials and corrected details.
+
+To use:
+
+Run the database.sql to insert the default admin.
+Login as admin@houseagency.com / admin.
+Use the "Create New Admin" form in the admin panel to add more admins.
+
+access super admin login_page
+http://localhost:3001/super-admin-login

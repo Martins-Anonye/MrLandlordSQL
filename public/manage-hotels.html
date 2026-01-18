@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Hotels - House Agency</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 0; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .card { background-color: #ffffff; border: 2px solid #DAA520; border-radius: 8px; padding: 1rem; margin: 1rem 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .hotel-card { display: flex; justify-content: space-between; align-items: center; }
+    .hotel-card img { width: 200px; height: 150px; object-fit: cover; }
+    .hotel-details { flex: 1; margin-left: 1rem; }
+    button { background-color: #0000FF; color: #ffffff; border: none; padding: 0.5rem; cursor: pointer; border-radius: 4px; margin: 0.25rem; }
+    button:hover { background-color: #DAA520; }
+    .status { padding: 0.25rem; border-radius: 4px; color: white; }
+    .available { background-color: green; }
+    .booked { background-color: orange; }
+    .offline { background-color: red; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Manage My Hotels</h2>
+    <button onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+    <div id="hotelsContainer"></div>
+  </div>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+
+    function loadHotels() {
+      fetch('/api/houses/my-hotels', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(hotels => {
+          const container = document.getElementById('hotelsContainer');
+          hotels.forEach(hotel => {
+            const card = document.createElement('div');
+            card.className = 'card hotel-card';
+            const statusClass = hotel.status === 'available' ? 'available' : hotel.status === 'booked' ? 'booked' : 'offline';
+            card.innerHTML = `
+              <img src="/${hotel.images[0]}" alt="${hotel.name}">
+              <div class="hotel-details">
+                <h3>${hotel.name}</h3>
+                <p>${hotel.description}</p>
+                <p>Location: ${hotel.location}</p>
+                <p>Price per night: $${hotel.price_per_night}</p>
+                <p>Status: <span class="status ${statusClass}">${hotel.status}</span></p>
+                <button onclick="toggleStatus(${hotel.id}, '${hotel.status}')">${hotel.status === 'available' ? 'Take Offline' : 'Make Available'}</button>
+                <button onclick="viewBookings(${hotel.id})">View Bookings</button>
+                <button onclick="editHotel(${hotel.id})">Edit</button>
+                <button onclick="deleteHotel(${hotel.id})">Delete</button>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        });
+    }
+
+    function toggleStatus(hotelId, currentStatus) {
+      const newStatus = currentStatus === 'available' ? 'offline' : 'available';
+      fetch(`/api/houses/hotels/${hotelId}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ status: newStatus })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message);
+        loadHotels();
+      });
+    }
+
+    function viewBookings(hotelId) {
+      // Implement view bookings
+      alert('View bookings functionality to be implemented');
+    }
+
+    function editHotel(hotelId) {
+      // Implement edit
+      alert('Edit functionality to be implemented');
+    }
+
+    function deleteHotel(hotelId) {
+      if (confirm('Delete hotel?')) {
+        fetch(`/api/houses/hotels/${hotelId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+          alert(data.message);
+          loadHotels();
+        });
+      }
+    }
+
+    loadHotels();
+  </script>
+</body>
+</html>

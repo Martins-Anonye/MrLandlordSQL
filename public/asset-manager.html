@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Manager - House Agency</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; }
+    .container { padding: 2rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #000000; padding: 0.5rem; }
+    button { background-color: #0000ff; color: #ffffff; padding: 0.5rem; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Asset Manager Panel</h2>
+    <button id="logoutBtn">Logout</button>
+    <h3>Slot Subscriptions</h3>
+    <table id="slotsTable">
+      <thead>
+        <tr><th>Landlord</th><th>Title</th><th>Type</th><th>Capacity</th><th>Duration</th><th>Price</th><th>Purchased At</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+
+    // Load slots
+    fetch('/api/admin/slots', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.querySelector('#slotsTable tbody');
+      data.forEach(slot => {
+        if (slot.landlord_id) { // only purchased
+          const row = `<tr>
+            <td>${slot.landlord_name}</td>
+            <td>${slot.slot_title}</td>
+            <td>${slot.type}</td>
+            <td>${slot.capacity}</td>
+            <td>${slot.duration} days</td>
+            <td>${slot.price}</td>
+            <td>${slot.created_at}</td>
+          </tr>`;
+          tbody.innerHTML += row;
+        }
+      });
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      fetch('/api/auth/logout', { method: 'POST' });
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    });
+  </script>
+</body>
+</html>

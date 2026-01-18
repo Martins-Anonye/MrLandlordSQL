@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>House Rentals - House Agency</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 0; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .card { background-color: #ffffff; border: 2px solid #DAA520; border-radius: 8px; padding: 1rem; margin: 1rem 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .house-card { display: flex; justify-content: space-between; align-items: center; }
+    .house-card img { width: 200px; height: 150px; object-fit: cover; }
+    .house-details { flex: 1; margin-left: 1rem; }
+    button { background-color: #0000FF; color: #ffffff; border: none; padding: 0.5rem; cursor: pointer; border-radius: 4px; }
+    button:hover { background-color: #DAA520; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Available Houses for Rent</h2>
+    <button onclick="window.location.href='/login'">Login</button>
+    <div id="housesContainer"></div>
+  </div>
+  <script>
+    const token = localStorage.getItem('token');
+
+    function loadHouses() {
+      fetch('/api/houses/')
+        .then(res => res.json())
+        .then(houses => {
+          const container = document.getElementById('housesContainer');
+          houses.forEach(house => {
+            const card = document.createElement('div');
+            card.className = 'card house-card';
+            card.innerHTML = `
+              <img src="/${house.images[0]}" alt="${house.title}">
+              <div class="house-details">
+                <h3>${house.title}</h3>
+                <p>${house.description}</p>
+                <p>Location: ${house.location}</p>
+                <p>Price: $${house.price}</p>
+                <button onclick="rentHouse(${house.id})">Rent Now</button>
+                <button onclick="checkIn(${house.id})">Check In</button>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        });
+    }
+
+    function rentHouse(houseId) {
+      if (!token) return alert('Please login to rent');
+      // Implement rent logic
+      alert('Rent functionality to be implemented');
+    }
+
+    function checkIn(houseId) {
+      if (!token) return alert('Please login to check in');
+      const imageInput = document.createElement('input');
+      imageInput.type = 'file';
+      imageInput.accept = 'image/*';
+      imageInput.onchange = () => {
+        const formData = new FormData();
+        formData.append('image', imageInput.files[0]);
+        fetch(`/api/houses/${houseId}/checkin`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        })
+        .then(res => res.json())
+        .then(data => alert(data.message));
+      };
+      imageInput.click();
+    }
+
+    loadHouses();
+  </script>
+</body>
+</html>

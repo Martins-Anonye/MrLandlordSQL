@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>House Agency</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      color: #000000;
+    }
+    header {
+      background-color: #000000;
+      color: #ffffff;
+      padding: 1rem;
+      text-align: center;
+    }
+    nav {
+      background-color: #ffd700; /* gold */
+      padding: 0.5rem;
+    }
+    nav a {
+      color: #000000;
+      margin: 0 1rem;
+      text-decoration: none;
+    }
+    main {
+      padding: 2rem;
+    }
+    .house {
+      border: 1px solid #0000ff; /* blue */
+      margin: 1rem 0;
+      padding: 1rem;
+    }
+    footer {
+      background-color: #000000;
+      color: #ffffff;
+      text-align: center;
+      padding: 1rem;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+    @media (max-width: 600px) {
+      main {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>House Agency</h1>
+  </header>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/house-rentals">House Rentals</a>
+    <a href="/hotels">Hotels</a>
+    <a href="/login">Login</a>
+    <a href="/register">Register</a>
+    <a href="/dashboard">Dashboard</a>
+  </nav>
+  <main>
+    <h2>Available Houses</h2>
+    <div id="houses"></div>
+  </main>
+  <footer>
+    <p>&copy; 2025 House Agency</p>
+  </footer>
+
+  <script>
+    // Check login
+    const token = localStorage.getItem('token');
+    if (token) {
+      const nav = document.querySelector('nav');
+      nav.innerHTML += '<a href="#" id="logoutLink">Logout</a>';
+      document.getElementById('logoutLink').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await fetch('/api/auth/logout', { method: 'POST' });
+        localStorage.removeItem('token');
+        location.reload();
+      });
+      // Decode role
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.role === 'admin') {
+        nav.innerHTML += '<a href="/admin">Admin Panel</a>';
+      }
+    }
+
+    // Fetch houses
+    fetch('/api/houses')
+      .then(res => res.json())
+      .then(data => {
+        const housesDiv = document.getElementById('houses');
+        data.forEach(house => {
+          const div = document.createElement('div');
+          div.className = 'house';
+          const totalPrice = parseFloat(house.price) + parseFloat(house.lawyer_fee || 0) + parseFloat(house.agent_fee || 0);
+          div.innerHTML = `
+            <h3>${house.title}</h3>
+            <p>${house.description}</p>
+            <p>Location: ${house.location}</p>
+            <p>Price: $${house.price}</p>
+            <p>Lawyer Fee: $${house.lawyer_fee || 0}</p>
+            <p>Agent Fee: $${house.agent_fee || 0}</p>
+            <p>Total Price: $${totalPrice.toFixed(2)}</p>
+            <button onclick="checkin(${house.id})">Check In</button>
+          `;
+          housesDiv.appendChild(div);
+        });
+      });
+
+    function checkin(houseId) {
+      if (!token) {
+        alert('Please login to check in');
+        window.location.href = '/login';
+        return;
+      }
+      // Capture image using webcam API
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          const video = document.createElement('video');
+          video.srcObject = stream;
+          video.play();
+          // Capture frame and send
+          // For simplicity, assume image captured
+          const formData = new FormData();
+          // formData.append('image', capturedImage);
+          fetch(`/api/houses/${houseId}/checkin`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+          }).then(res => res.json()).then(data => alert(data.message));
+        });
+    }
+  </script>
+</body>
+</html>

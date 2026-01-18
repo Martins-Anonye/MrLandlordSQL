@@ -1,0 +1,49 @@
+I have implemented the requested features for your house agent application. Here's a summary of the changes made:
+
+Database Updates
+Added super_admin and asset_manager roles to the users table enum.
+Added asset_manager_id field to link landlords to asset managers.
+Updated the default admin to super_admin with a plain text password (admin123).
+Authentication Changes
+Modified login logic to bypass bcrypt for super_admin accounts.
+Added a separate /super-admin-login route for super admin access.
+Created super-admin-login.html page for super admin login.
+Added routes to fetch asset managers and allow landlords to select one.
+Slot Management
+Added CRUD operations for slots in the admin panel (create, read, update, delete).
+Slots include: price, capacity (types: house, shop, car, bicycle, motorcycle, baby market, general public market, land market, 
+tax payment), duration, and other details.
+Added slot purchase functionality for landlords.
+Modified house upload to require a valid house slot owned by the landlord.
+Asset Manager Features
+Created asset-manager.html page showing all slot subscriptions (purchased slots with landlord details).
+Landlords can select an asset manager from the dashboard.
+Asset managers can view all active slot subscriptions.
+Admin Panel Enhancements
+Updated admin panel to include slot management interface.
+Admins (including super admin) can create and manage slots.
+Dashboard Updates
+Landlords can now select an asset manager.
+Added slot purchasing interface for available slots.
+House upload now requires selecting a owned house slot.
+Displays landlord's purchased slots.
+Key Features Implemented
+Super Admin Plain Password: Super admin password is stored and
+ checked as plain text.
+Separate Super Admin Login: Dedicated login page and route.
+Asset Manager Selection: Landlords can choose asset managers.
+Slot Subscriptions Visibility: Asset managers see all purchased slots.
+Admin Slot Management: Full CRUD for slots with all specified details.
+House Upload with Slots: Landlords must own a house slot to upload houses.
+The application is now ready with these features. Note that the database schema needs 
+to be updated by running init-db.js after starting your MySQL server. 
+The server can be started with the existing task.
+
+
+ also make admin to be able and  manage  room sizes , data type should by text so as  to specify width and height size and si unit, let room size to be appeari in dropdown for land lord to select as room size  choose value, let it reflect for  Bedroom:
+Living Room:
+Kitchen:
+Bathroom, also allow landlord to turn on and off rooms that are avalible before upload, after successfull upload,  open aminites check page for  landlord to specify avalibale  amanities, enforce slot capacity   which  means slop capacity = subslot = number of reuse, landlord can also upload if there is availbe sub_slot in the slot capacity,
+ once a slot is used it should be deducted from 
+ it resptive slot  capacity till it 
+ turns to zero mean.
