@@ -3,7 +3,7 @@
 git init
 
 
-Tell git whom you are:
+>>>Tell git whom you are:
 
 Scope	Command Example	Where It Applies: example>>>
 
@@ -13,12 +13,24 @@ Local	e.g>>> git config user.email	Only the current repo
 
 Usage:
 
-git config --global user.email "you@example.com"
+  git config --global user.email "you@example.com"
   git config --global user.name "Your Name"
 
   git config  user.email "ugomartinsdegreat@gmail.com"
 
 
+
+
+
+
+>>>>link your git online accout:
+
+git remote add origin https://github.com/username/quadratic_app.git
+
+
+
+
+>>>>>>add all files and folders for git to set ready for upload
 
 git add .
 git commit -m "Initial commit: Special Update"
@@ -27,16 +39,8 @@ git commit -m "Initial commit: Special Update"
 
 
 
-git remote add origin https://github.com/username/quadratic_app.git
-
-
-
-
 git branch -M main
 git push -u origin main
-
-
-
 
 
 
@@ -51,9 +55,7 @@ git push
 
 
 
-
-
-ignore some files from been uploaded:
+>>>ignore some files from been uploaded:
 
 create a file name it .gitignore
 
@@ -82,7 +84,7 @@ Thumbs.db
 
 
 
-add the ignore so as to remember file to ignore:
+>>>>add the ignore so as to remember file to ignore:
 
 git add .gitignore
 git commit -m "Add .gitignore to ignore unnecessary files"
@@ -95,7 +97,7 @@ git push
 
 
 
-how to use git add .   and make sure it ignore those specified files and folders
+>>>>>how to use git add .   and make sure it ignore those specified files and folders
 
 
 step 1:
@@ -106,7 +108,7 @@ git status
 
 
 
-Add every thing ion git but will not upload those listed in ignore, 
+Add every thing in git but will not upload those listed in ignore, 
 because  git add .gitignore has ensure file and folder to filter.
 
 
@@ -122,7 +124,7 @@ git push
 
 
 
-If error occure like:
+>>>>If error occure like:
 git status
 On branch master
 Changes not staged for commit:
@@ -136,3 +138,17 @@ no changes added to commit (use "git add" and/or "git commit -a")
 solve by using:
 git add .
 git commit -m "Add .gitignore to ignore unnecessary files" 
+
+
+
+
+
+>>>>When you execute 
+git status  and you have this response:
+
+
+On branch master
+nothing to commit, working tree clean.
+
+
+it 
