@@ -19,10 +19,11 @@ router.post('/initiate', async (req, res) => {
 
   try {
     // Fetch house details
-    const [houses] = await db.execute('SELECT price, lawyer_fee, agent_fee FROM houses WHERE id = ?', [houseId]);
+    const [houses] = await db.execute('SELECT price, agent_fee FROM houses WHERE id = ?', [houseId]);
     if (houses.length === 0) return res.status(404).json({ error: 'House not found' });
     const house = houses[0];
-    const totalAmount = parseFloat(house.price) + parseFloat(house.lawyer_fee || 0) + parseFloat(house.agent_fee || 0);
+    // lawyer_fee is no longer charged separately; if lawyer is in charge contact info is stored
+    const totalAmount = parseFloat(house.price) + parseFloat(house.agent_fee || 0);
 
     let response;
     if (gateway === 'paystack') {

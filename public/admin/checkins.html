@@ -1,0 +1,36 @@
+<div class="card">
+  <h3>Check-ins</h3>
+  <table id="checkinsTable">
+    <thead>
+      <tr><th>User</th><th>House</th><th>Time</th><th>Image</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+  function loadCheckins() {
+    const token = localStorage.getItem('token');
+    fetch('/api/admin/checkins', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`Load checkins failed: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        const tbody = document.querySelector('#checkinsTable tbody');
+        tbody.innerHTML = '';
+        if (data && Array.isArray(data)) {
+          data.forEach(checkin => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${checkin.name}</td><td>${checkin.title}</td><td>${checkin.checkin_time}</td><td><img src="/${checkin.image}" width="50"></td>`;
+            tbody.appendChild(tr);
+          });
+        }
+      })
+      .catch(err => console.error('Error loading checkins:', err));
+  }
+
+  loadCheckins();
+</script>

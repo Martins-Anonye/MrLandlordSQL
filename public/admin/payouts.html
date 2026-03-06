@@ -1,0 +1,51 @@
+<div class="card">
+  <h3>Payouts</h3>
+  <table id="payoutsTable">
+    <thead>
+      <tr><th>Landlord</th><th>Amount</th><th>Action</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+  function loadPayouts() {
+    const token = localStorage.getItem('token');
+    fetch('/api/admin/payouts', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`Load payouts failed: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        const tbody = document.querySelector('#payoutsTable tbody');
+        tbody.innerHTML = '';
+        if (data && Array.isArray(data)) {
+          data.forEach(payout => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${payout.landlord_id}</td><td>${payout.amount}</td><td><button onclick="processPayout(${payout.id})">Process</button></td>`;
+            tbody.appendChild(tr);
+          });
+        }
+      })
+      .catch(err => console.error('Error loading payouts:', err));
+  }
+
+  window.processPayout = function(id) {
+    const token = localStorage.getItem('token');
+    fetch(`/api/admin/payout/${id}`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message);
+        loadPayouts();
+      })
+      .catch(err => console.error('Error processing payout:', err));
+  };
+
+  loadPayouts();
+</script>
+

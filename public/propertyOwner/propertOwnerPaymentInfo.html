@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Information - Property Owner</title>
+    <style>
+#con{
+    width: 100%;
+    height: 100%;
+    color: white;
+    position: relative;
+    z-index: 2;
+}
+    
+h2{
+    color:white;
+    font-size: x-large;
+}
+tr{
+    font-size: x-large;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.button-group button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-save {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-save:hover {
+    background-color: #45a049;
+}
+
+.btn-reset {
+    background-color: #2196F3;
+    color: white;
+}
+
+.btn-reset:hover {
+    background-color: #0b7dda;
+}
+
+.btn-delete {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #da190b;
+}
+
+.btn-back {
+    background-color: #666;
+    color: white;
+}
+
+.btn-back:hover {
+    background-color: #555;
+}
+
+.status-message {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 4px;
+    display: none;
+}
+
+.status-message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    display: block;
+}
+
+.status-message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    display: block;
+}
+
+.status-message.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+    display: block;
+}
+
+    </style>
+
+
+<link rel="stylesheet" href="/background/backgroundcss.css"/>
+
+
+</head>
+
+<body>
+
+    <div id="backgroundDesign"  imageLocation="/background/house.png"></div>
+    
+   <div id="con">
+    <div id="semicon"></div>
+
+    <form id="paymentInfoForm">
+        <table>
+            <tr><h2>LANDLORD PERSONAL DETAILS</h2></tr>
+            <tr><td> First Name <span style="color:red;">*</span></td><td><input type="text" id="first" required></td></tr>
+            <tr><td>Second Name</td><td><input type="text" id="second"></td></tr>
+             <tr><td>Other Names</td><td><input type="text" id="other"></td></tr>
+             <tr><td>Phone number</td><td><input type="tel" id="phone"></td></tr>
+             <tr><td>Alternative phone number</td><td><input type="tel" id="alter"></td></tr>
+
+            
+   <tr><td><h2>BANK DETAILS</h2></td></tr>
+   <tr><td>Bank name <span style="color:red;">*</span></td><td><input type="text" id="bank" required></td></tr>
+  <tr><td>Bank account number <span style="color:red;">*</span></td><td><input type="number" id="account" required></td></tr>
+  <tr><td>Account name <span style="color:red;">*</span></td><td><input type="text" id="accountname" required></td></tr>
+   
+     <tr><td colspan="2">
+        <div class="button-group">
+            <button type="submit" class="btn-save">💾 Save</button>
+            <button type="reset" class="btn-reset">🔄 Reset</button>
+            <button type="button" class="btn-delete" id="deleteBtn">🗑️ Delete All</button>
+            <button type="button" class="btn-back" onclick="window.location.href='/dashboard'">← Back to Dashboard</button>
+        </div>
+     </td></tr>
+     
+     <tr><td colspan="2">
+        <div id="statusMessage" class="status-message"></div>
+     </td></tr>
+           
+            </table>
+            </form>   
+   </div>
+   
+  
+        <script>
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+            }
+
+            function showMessage(message, type) {
+                const msgDiv = document.getElementById('statusMessage');
+                msgDiv.textContent = message;
+                msgDiv.className = `status-message ${type}`;
+                setTimeout(() => {
+                    msgDiv.className = 'status-message';
+                }, 5000);
+            }
+
+            let hasExistingData = false;
+
+            async function loadPaymentInfo() {
+                try {
+                    const res = await fetch('/api/landlord/payment-info', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    const data = await res.json();
+                    if (data) {
+                        document.getElementById('first').value = data.first_name || '';
+                        document.getElementById('second').value = data.second_name || '';
+                        document.getElementById('other').value = data.other_names || '';
+                        document.getElementById('phone').value = data.phone || '';
+                        document.getElementById('alter').value = data.alt_phone || '';
+                        document.getElementById('bank').value = data.bank_name || '';
+                        document.getElementById('account').value = data.account_number || '';
+                        document.getElementById('accountname').value = data.account_name || '';
+                        hasExistingData = true;
+                        showMessage('✓ Your payment information has been loaded. You can update it below.', 'info');
+                    } else {
+                        hasExistingData = false;
+                        showMessage('No payment information found yet. Please fill in your details to get started.', 'info');
+                    }
+                } catch (err) {
+                    console.error('Error loading payment info', err);
+                    showMessage('Failed to load payment information. Please try again.', 'error');
+                }
+            }
+
+            // CREATE/UPDATE: Save payment info
+            document.getElementById('paymentInfoForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const payload = {
+                    first_name: document.getElementById('first').value,
+                    second_name: document.getElementById('second').value,
+                    other_names: document.getElementById('other').value,
+                    phone: document.getElementById('phone').value,
+                    alt_phone: document.getElementById('alter').value,
+                    bank_name: document.getElementById('bank').value,
+                    account_number: document.getElementById('account').value,
+                    account_name: document.getElementById('accountname').value
+                };
+                try {
+                    const res = await fetch('/api/landlord/payment-info', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!res.ok) {
+                        const errorData = await res.json();
+                        throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+                    }
+                    const data = await res.json();
+                    const operation = hasExistingData ? 'updated' : 'created';
+                    showMessage(`✓ Payment information ${operation} successfully!`, 'success');
+                    hasExistingData = true;
+                    loadPaymentInfo();
+                } catch (err) {
+                    console.error('Error saving payment info', err);
+                    showMessage(`✗ Error: ${err.message}`, 'error');
+                }
+            });
+
+            // DELETE: Delete all payment info
+            document.getElementById('deleteBtn').addEventListener('click', async () => {
+                if (!confirm('Are you sure you want to delete all your payment information? This action cannot be undone.')) {
+                    return;
+                }
+                try {
+                    const res = await fetch('/api/landlord/payment-info', {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) {
+                        const errorData = await res.json();
+                        throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+                    }
+                    const data = await res.json();
+                    showMessage(data.message || 'Payment information deleted successfully!', 'success');
+                    document.getElementById('paymentInfoForm').reset();
+                    setTimeout(() => loadPaymentInfo(), 2000);
+                } catch (err) {
+                    console.error('Error deleting payment info', err);
+                    showMessage(`Error: ${err.message}`, 'error');
+                }
+            });
+
+            // Load initial data
+            loadPaymentInfo();
+        </script>
+     
+   <script src="/background/backgroundscript.js"></script>
+</body>
+</html>

@@ -98,14 +98,28 @@
         data.forEach(house => {
           const div = document.createElement('div');
           div.className = 'house';
-          const totalPrice = parseFloat(house.price) + parseFloat(house.lawyer_fee || 0) + parseFloat(house.agent_fee || 0);
+          // price already includes any lawyer portion; agent fee extra
+          const totalPrice = parseFloat(house.price) + parseFloat(house.agent_fee || 0);
           div.innerHTML = `
             <h3>${house.title}</h3>
             <p>${house.description}</p>
+            ${house.state ? `<p>State: ${house.state}</p>` : ''}
+            ${house.area ? `<p>Area (LGA): ${house.area}</p>` : ''}
             <p>Location: ${house.location}</p>
             <p>Price: $${house.price}</p>
-            <p>Lawyer Fee: $${house.lawyer_fee || 0}</p>
-            <p>Agent Fee: $${house.agent_fee || 0}</p>
+            ${
+              house.lawyer_in_charge ?
+                `<p>Lawyer in charge: ${house.lawyer_name || ''}${house.lawyer_phone ? ' ('+house.lawyer_phone+')' : ''}${house.lawyer_email ? ' ‹'+house.lawyer_email+'›' : ''}</p>` :
+                '' /* no separate lawyer fee anymore */
+            }
+            ${
+              house.agent_in_charge ?
+                `<p>Agent/Manager in charge: ${house.agent_name || ''}${house.agent_phone ? ' ('+house.agent_phone+')' : ''}${house.agent_email ? ' ‹'+house.agent_email+'›' : ''}</p>` :
+                ''
+            }
+            ${
+              house.agent_fee ? `<p>Agent Fee: $${house.agent_fee}</p>` : ''
+            }
             <p>Total Price: $${totalPrice.toFixed(2)}</p>
             <button onclick="checkin(${house.id})">Check In</button>
           `;

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Hotel - House Agency</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 0; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .card { background-color: #ffffff; border: 2px solid #DAA520; border-radius: 8px; padding: 1rem; margin: 1rem 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 0.5rem; color: #0000FF; font-weight: bold; }
+    input, select, textarea, button { width: 100%; padding: 0.5rem; border: 1px solid #DAA520; border-radius: 4px; }
+    button { background-color: #0000FF; color: #ffffff; border: none; cursor: pointer; margin-top: 0.5rem; }
+    button:hover { background-color: #DAA520; }
+    /* simple tag styling */
+    .tags-container .tag {
+      display: inline-block;
+      background-color: #DAA520;
+      color: #000;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      margin: 0 0.25rem 0.25rem 0;
+      font-size: 0.9rem;
+    }
+    .tags-container .tag-close {
+      margin-left: 0.3rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Upload Hotel</h2>
+    <button onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+    <div class="card">
+      <h3>Select Purchased Hotel Slot</h3>
+      <select id="slotSelect"></select>
+      <p class="muted" style="font-size:0.85rem; margin-top:0.3rem; color:#555;">Only slots that are still valid (not expired) with one or more remaining uses are shown.</p>
+    </div>
+    <div class="card">
+      <h3>Upload Hotel</h3>
+      <form id="uploadForm" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="name">Hotel Name:</label>
+          <input type="text" id="name" required>
+        </div>
+        <div class="form-group">
+          <label for="description">Description:</label>
+          <textarea id="description"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="location">Location:</label>
+          <input type="text" id="location" required>
+        </div>
+        <div class="form-group">
+          <label for="latitude">Latitude:</label>
+          <input type="number" id="latitude" step="0.000001" required>
+        </div>
+        <div class="form-group">
+          <label for="longitude">Longitude:</label>
+          <input type="number" id="longitude" step="0.000001" required>
+        </div>
+        <div class="form-group">
+          <label for="price_per_night">Price per Night:</label>
+          <input type="number" id="price_per_night" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label>Amenities</label>
+          <!-- tags area where selected amenities appear -->
+          <div id="amenitiesTags" class="tags-container" style="min-height:2.5rem;border:1px solid #DAA520;padding:0.5rem;border-radius:4px;"></div>
+          <!-- free text input for adding custom amenity names -->
+          <input type="text" id="amenityInput" placeholder="Type and press Enter to add" style="margin-top:0.5rem;">
+          <!-- hidden input to satisfy formData default but we append manually on submit -->
+          <input type="hidden" id="amenities" name="amenities">
+          <!-- amenities checkboxes will be injected here so landlords can choose from existing items -->
+          <div id="amenitiesContainer" style="margin-top:0.5rem;"></div>
+        </div>
+        <div class="form-group">
+          <label for="images">Images:</label>
+          <input type="file" id="images" multiple accept="image/*">
+        </div>
+        <div class="form-group">
+          <label for="video">Video:</label>
+          <input type="file" id="video" accept="video/*">
+        </div>
+        <button type="submit">Upload Hotel</button>
+      </form>
+    </div>
+  </div>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+
+    function loadSlots() {
+      fetch('/api/houses/my-slots', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(slots => {
+          const select = document.getElementById('slotSelect');
+          select.innerHTML = '<option value="">Select Slot</option>';
+          const hotelSlots = slots.filter(s => s.type === 'hotel');
+          if (hotelSlots.length === 0) {
+            const opt = document.createElement('option');
+            opt.textContent = 'No slots with sufficient capacity';
+            opt.disabled = true;
+            select.appendChild(opt);
+            return;
+          }
+          hotelSlots.forEach(slot => {
+            const option = document.createElement('option');
+            option.value = slot.id;
+            if (slot.remaining_capacity != null) {
+              option.textContent = `${slot.slot_title || slot.type} (${slot.remaining_capacity} left) - Expires: ${new Date(slot.expires_at).toLocaleDateString()}`;
+            } else {
+              option.textContent = `${slot.slot_title || slot.type} - Expires: ${new Date(slot.expires_at).toLocaleDateString()}`;
+            }
+            select.appendChild(option);
+          });
+        });
+    }
+
+    // load amenity categories and items for hotels; clicking a checkbox will
+    // add/remove tags from the tag container.  manual entries can also be
+    // typed and added via the input below the tags area.
+    function loadHotelAmenities() {
+      fetch('/api/houses/categories')
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then(categories => {
+          const container = document.getElementById('amenitiesContainer');
+          if (!Array.isArray(categories) || categories.length === 0) {
+            container.textContent = 'No amenities available';
+            return;
+          }
+          categories.forEach(cat => {
+            const catDiv = document.createElement('div');
+            const h4 = document.createElement('h4');
+            h4.textContent = cat.name;
+            catDiv.appendChild(h4);
+            if (cat.items && cat.items.length) {
+              cat.items.forEach(item => {
+                const label = document.createElement('label');
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = item.name;
+                cb.addEventListener('change', () => {
+                  if (cb.checked) addTag(cb.value);
+                  else removeTag(cb.value);
+                });
+                label.append(cb, ' ', item.name);
+                catDiv.appendChild(label);
+                catDiv.appendChild(document.createElement('br'));
+              });
+            }
+            container.appendChild(catDiv);
+          });
+        })
+        .catch(err => {
+          console.error('Error loading amenities:', err);
+          document.getElementById('amenitiesContainer').textContent = 'Failed to load amenities';
+        });
+    }
+
+    // maintain a list of selected amenity strings and render them as tags
+    let selectedAmenities = [];
+
+    function renderTags() {
+      const tagsDiv = document.getElementById('amenitiesTags');
+      tagsDiv.innerHTML = '';
+      selectedAmenities.forEach(name => {
+        const tag = document.createElement('span');
+        tag.textContent = name;
+        tag.className = 'tag';
+        const close = document.createElement('span');
+        close.textContent = '×';
+        close.className = 'tag-close';
+        close.onclick = () => removeTag(name);
+        tag.appendChild(close);
+        tagsDiv.appendChild(tag);
+      });
+      // keep hidden input updated for graceful degradation
+      document.getElementById('amenities').value = JSON.stringify(selectedAmenities);
+    }
+
+    function addTag(name) {
+      if (!name || selectedAmenities.includes(name)) return;
+      selectedAmenities.push(name);
+      // if checkbox exists, check it
+      const cb = Array.from(document.querySelectorAll('#amenitiesContainer input[type=checkbox]')).find(i => i.value === name);
+      if (cb) cb.checked = true;
+      renderTags();
+    }
+
+    function removeTag(name) {
+      selectedAmenities = selectedAmenities.filter(n => n !== name);
+      const cb = Array.from(document.querySelectorAll('#amenitiesContainer input[type=checkbox]')).find(i => i.value === name);
+      if (cb) cb.checked = false;
+      renderTags();
+    }
+
+    // listen to manual input enter key
+    document.addEventListener('DOMContentLoaded', () => {
+      const amenityInput = document.getElementById('amenityInput');
+      amenityInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const val = amenityInput.value.trim();
+          if (val) {
+            addTag(val);
+            amenityInput.value = '';
+          }
+        }
+      });
+    });
+
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const slotId = document.getElementById('slotSelect').value;
+      if (!slotId) return alert('Select a slot');
+      const formData = new FormData();
+      formData.append('slot_id', slotId);
+      formData.append('name', document.getElementById('name').value);
+      formData.append('description', document.getElementById('description').value);
+      formData.append('location', document.getElementById('location').value);
+      formData.append('latitude', document.getElementById('latitude').value);
+      formData.append('longitude', document.getElementById('longitude').value);
+      formData.append('price_per_night', document.getElementById('price_per_night').value);
+      formData.append('amenities', JSON.stringify(selectedAmenities));
+      const images = document.getElementById('images').files;
+      for (let i = 0; i < images.length; i++) formData.append('images', images[i]);
+      const video = document.getElementById('video').files[0];
+      if (video) formData.append('video', video);
+      fetch('/api/houses/upload-hotel', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert('Hotel uploaded successfully!');
+        document.getElementById('uploadForm').reset();
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Error uploading hotel');
+      });
+    });
+
+    loadSlots();
+    loadHotelAmenities();
+  </script>
+</body>
+</html>

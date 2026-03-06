@@ -1,0 +1,27 @@
+
+-- Insert default tenant categories
+INSERT INTO tenant_category (name) VALUES 
+('All Accepted'),
+('Students'),
+('Youth 18-40yrs'),
+('Male tenants'),
+('Female tenants'),
+('Adult'),
+('Family'),
+('NYSC Corps'),
+('Corpers'),
+('Business men'),
+('Soldier'),
+('Army'),
+('Police officer'),
+('Aged/Oldies'),
+('University Student'),
+('Naval Officer'),
+('Teachers/Lecturers'),
+('Lawyers/Judges'),
+('Doctors'),
+('Civil Servant'),
+('Retired Personnel/Emeritus'),
+('Baby Mama'),
+('Single Mama'),
+('Single');

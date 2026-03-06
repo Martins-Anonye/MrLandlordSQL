@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - House Agency</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 0; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .header h2 { margin: 0; }
+    #logoutBtn { width: auto; padding: 0.5rem 1rem; }
+    .nav-menu { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
+    .nav-btn { width: auto; padding: 0.5rem 1rem; font-size: 0.9rem; }
+    .nav-btn.active { background-color: #DAA520; }
+    .card { background-color: #ffffff; border: 2px solid #DAA520; border-radius: 8px; padding: 1rem; margin: 1rem 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .card h3 { color: #0000FF; margin-top: 0; }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 0.5rem; color: #0000FF; font-weight: bold; }
+    input, select, textarea, button { width: 100%; padding: 0.5rem; border: 1px solid #DAA520; border-radius: 4px; }
+    button { background-color: #0000FF; color: #ffffff; border: none; cursor: pointer; margin-top: 0.5rem; }
+    button:hover { background-color: #DAA520; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { border: 1px solid #DAA520; padding: 0.5rem; text-align: left; }
+    th { background-color: #f0f0f0; color: #0000FF; }
+    .user-card { background-color: #ffffff; border: 1px solid #DAA520; border-radius: 4px; padding: 0.5rem; margin: 0.5rem 0; }
+    .section { display: none; }
+    .section.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Admin Panel</h2>
+      <button id="logoutBtn">Logout</button>
+    </div>
+
+    <!-- Navigation Menu -->
+    <div class="nav-menu">
+      <button class="nav-btn active" data-section="createAdminSection">Create Admin</button>
+      <button class="nav-btn" data-section="usersSection">Users</button>
+      <button class="nav-btn" data-section="checkinsSection">Check-ins</button>
+      <button class="nav-btn" data-section="payoutsSection">Payouts</button>
+      <button class="nav-btn" data-section="slotManagementSection">Slots</button>
+      <button class="nav-btn" data-section="roomSizesSection">Room Sizes</button>
+      <button class="nav-btn" data-section="specialResourcesSection">Special Resources</button>
+      <button class="nav-btn" data-section="slotServicesSection">Slot Services</button>
+    </div>
+
+    <!-- Create Admin Section -->
+    <div id="createAdminSection" class="section active"></div>
+
+    <!-- Users Section -->
+    <div id="usersSection" class="section"></div>
+
+    <!-- Check-ins Section -->
+    <div id="checkinsSection" class="section"></div>
+
+    <!-- Payouts Section -->
+    <div id="payoutsSection" class="section"></div>
+
+    <!-- Slot Management Section -->
+    <div id="slotManagementSection" class="section"></div>
+
+    <!-- Room Sizes Section -->
+    <div id="roomSizesSection" class="section"></div>
+
+    <!-- Special Resources Section -->
+    <div id="specialResourcesSection" class="section"></div>
+
+    <!-- Slot Services Section -->
+    <div id="slotServicesSection" class="section"></div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      localStorage.removeItem('token');
+      window.location.href = '/';
+    });
+
+    // Navigation functionality
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const sections = document.querySelectorAll('.section');
+
+    navButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const sectionId = button.dataset.section;
+        
+        // Remove active class from all buttons and sections
+        navButtons.forEach(btn => btn.classList.remove('active'));
+        sections.forEach(section => section.classList.remove('active'));
+        
+        // Add active class to clicked button and corresponding section
+        button.classList.add('active');
+        document.getElementById(sectionId).classList.add('active');
+      });
+    });
+
+    // Load components dynamically
+    async function loadComponent(componentId, filePath) {
+      try {
+        const response = await fetch(filePath);
+        const html = await response.text();
+        document.getElementById(componentId).innerHTML = html;
+        
+        // Load scripts after component is loaded
+        const scripts = new DOMParser().parseFromString(html, 'text/html').querySelectorAll('script');
+            scripts.forEach(script => {
+              const newScript = document.createElement('script');
+              // wrap component script in IIFE to prevent redeclaration of globals like `token`
+              newScript.textContent = `(function(){\n${script.textContent}\n})();`;
+              document.body.appendChild(newScript);
+            });
+      } catch (error) {
+        console.error(`Error loading component ${filePath}:`, error);
+      }
+    }
+
+    // Load all components using absolute admin paths (avoids relative resolution issues)
+    loadComponent('createAdminSection', '/admin/create-admin.html');
+    loadComponent('usersSection', '/admin/users.html');
+    loadComponent('checkinsSection', '/admin/checkins.html');
+    loadComponent('payoutsSection', '/admin/payouts.html');
+    loadComponent('slotManagementSection', '/admin/slot-management.html');
+    loadComponent('roomSizesSection', '/admin/room-sizes.html');
+    loadComponent('specialResourcesSection', '/admin/special-resources.html');
+    loadComponent('slotServicesSection', '/admin/slot-services.html');
+
+    // Global scroll-to-top button for all components
+    const topBtn = document.createElement('button');
+    topBtn.textContent = '\u2191';
+    topBtn.style.position = 'fixed';
+    topBtn.style.bottom = '30px';
+    topBtn.style.right = '30px';
+    topBtn.style.display = 'none';
+    topBtn.style.width = '50px';
+    topBtn.style.height = '50px';
+    topBtn.style.borderRadius = '50%';
+    topBtn.style.backgroundColor = '#0000FF';
+    topBtn.style.color = '#fff';
+    topBtn.style.border = 'none';
+    topBtn.style.fontSize = '1.5rem';
+    topBtn.style.cursor = 'pointer';
+    topBtn.style.zIndex = '1000';
+    topBtn.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
+    topBtn.style.transition = 'all 0.3s ease';
+    topBtn.addEventListener('mouseover', () => {
+      topBtn.style.transform = 'scale(1.1)';
+      topBtn.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.4)';
+    });
+    topBtn.addEventListener('mouseout', () => {
+      topBtn.style.transform = 'scale(1)';
+      topBtn.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
+    });
+    document.body.appendChild(topBtn);
+    function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    topBtn.addEventListener('click', scrollToTop);
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 200) topBtn.style.display = 'block';
+      else topBtn.style.display = 'none';
+    });
+  </script>
+</body>
+</html>

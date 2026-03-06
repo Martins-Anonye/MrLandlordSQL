@@ -40,6 +40,7 @@
 
       <div class="card">
         <h3>Actions</h3>
+                <button onclick="window.location.href='/property-owner-payment-info'">General Payment Account</button>
         <button onclick="window.location.href='/purchase-slot'">Purchase New Slot</button>
         <button onclick="window.location.href='/purchased-slots'">View Purchased Slots</button>
         <button onclick="window.location.href='/upload-house'">Upload House</button>
@@ -59,69 +60,7 @@
 
       <div class="card">
         <h3>Upload House</h3>
-        <form id="uploadForm" enctype="multipart/form-data">
-          <div class="form-group">
-            <label for="slotSelect">Select House Slot:</label>
-            <select name="slot_id" id="slotSelect" required>
-              <option value="">Select Slot</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="title">Title:</label>
-            <input type="text" name="title" id="title" required>
-          </div>
-          <div class="form-group">
-            <label for="description">Description:</label>
-            <textarea name="description" id="description"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="location">Location:</label>
-            <input type="text" name="location" id="location" required>
-          </div>
-          <div class="form-group">
-            <label for="price">Price:</label>
-            <input type="number" name="price" id="price" step="0.01" required>
-          </div>
-          <h4>Room Sizes (sq ft)</h4>
-          <div class="form-group">
-            <label for="bedroom_size">Bedroom:</label>
-            <input type="number" name="bedroom_size" id="bedroom_size" step="0.01">
-          </div>
-          <div class="form-group">
-            <label for="living_room_size">Living Room:</label>
-            <input type="number" name="living_room_size" id="living_room_size" step="0.01">
-          </div>
-          <div class="form-group">
-            <label for="kitchen_size">Kitchen:</label>
-            <input type="number" name="kitchen_size" id="kitchen_size" step="0.01">
-          </div>
-          <div class="form-group">
-            <label for="bathroom_size">Bathroom:</label>
-            <input type="number" name="bathroom_size" id="bathroom_size" step="0.01">
-          </div>
-          <div class="form-group">
-            <label for="lawyer_fee">Lawyer Fee:</label>
-            <input type="number" name="lawyer_fee" id="lawyer_fee" step="0.01">
-          </div>
-          <div class="form-group">
-            <label for="agent_fee">Agent Fee:</label>
-            <input type="number" name="agent_fee" id="agent_fee" step="0.01">
-          </div>
-          <div class="form-group">
-            <label for="interior_quality">Interior Quality:</label>
-            <textarea name="interior_quality" id="interior_quality"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="exterior_quality">Exterior Quality:</label>
-            <textarea name="exterior_quality" id="exterior_quality"></textarea>
-          </div>
-          <h4>Images (up to 5, 1MB each)</h4>
-          <input type="file" name="images" accept="image/*" multiple>
-          <h4>Video (1, 5MB max)</h4>
-          <input type="file" name="video" accept="video/*">
-          <div id="resources"></div>
-          <button type="submit">Upload</button>
-        </form>
+        
     </div>
     <div id="publicSection">
       <div class="card">
@@ -142,23 +81,32 @@
 
       // Load asset managers
       fetch('/api/auth/asset-managers')
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
         .then(managers => {
           const select = document.getElementById('assetManagerSelect');
-          managers.forEach(m => {
-            const option = document.createElement('option');
-            option.value = m.id;
-            option.textContent = m.name;
-            select.appendChild(option);
-          });
-        });
+          if (Array.isArray(managers)) {
+            managers.forEach(m => {
+              const option = document.createElement('option');
+              option.value = m.id;
+              option.textContent = m.name;
+              select.appendChild(option);
+            });
+          }
+        })
+        .catch(err => console.error('Error loading asset managers:', err));
 
       // Load room sizes
       fetch('/api/houses/room-sizes')
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
         .then(sizes => {
           const container = document.getElementById('roomSizesContainer');
-          if (sizes.length === 0) {
+          if (!Array.isArray(sizes) || sizes.length === 0) {
             container.innerHTML = '<p>No room sizes defined yet.</p>';
           } else {
             const ul = document.createElement('ul');
@@ -169,7 +117,8 @@
             });
             container.appendChild(ul);
           }
-        });
+        })
+        .catch(err => console.error('Error loading room sizes:', err));
 
       // Select asset manager
       document.getElementById('selectAssetManagerBtn').addEventListener('click', async () => {
@@ -190,15 +139,21 @@
       fetch('/api/checkins', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
         .then(data => {
           const checkinsDiv = document.getElementById('checkins');
-          data.forEach(checkin => {
-            const div = document.createElement('div');
-            div.innerHTML = `<p>House: ${checkin.title}, Time: ${checkin.checkin_time}</p>`;
-            checkinsDiv.appendChild(div);
-          });
-        });
+          if (Array.isArray(data)) {
+            data.forEach(checkin => {
+              const div = document.createElement('div');
+              div.innerHTML = `<p>House: ${checkin.title}, Time: ${checkin.checkin_time}</p>`;
+              checkinsDiv.appendChild(div);
+            });
+          }
+        })
+        .catch(err => console.error('Error loading checkins:', err));
     }
 
     // Logout

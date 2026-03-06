@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload House - House Agency</title>
+  <style>
+    /* Theme variables and modern look */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+    :root{
+      --brand-blue: #4a90e2;
+      --brand-gold: #DAA520;
+      --bg: #f0f2f5;
+
+      --text: #222222;
+      /* --muted: #555555; */
+        --muted: white;
+      --card-bg: #ffffff;
+
+      --black: #000000;
+    }
+    /* icon helpers */
+    .icon { width: 18px; height: 18px; vertical-align: middle; margin-right: 8px; fill: var(--brand-blue); }
+    .btn-icon { width: 18px; height: 18px; display: inline-block; margin-right: 8px; vertical-align: middle; }
+    body { font-family: 'Roboto', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
+    .container { max-width: 960px; margin: 0 auto; padding: 2rem 1rem; }
+    .card { 
+      /* background-color: var(--card-bg);  */
+      border-radius: 10px; padding: 2rem; margin: 2rem 0; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-left: 6px solid var(--brand-gold); }
+    .form-group { margin-bottom: 1.5rem; }
+    label { display: block; margin-bottom: 0.5rem; color: var(--muted); font-weight: 500; }
+    input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; transition: border-color 0.15s, box-shadow 0.15s; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--brand-blue); box-shadow: 0 6px 18px rgba(74,144,226,0.06); }
+    button { background-color: var(--brand-blue); color: #fff; border: none; cursor: pointer; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 1rem; transition: background-color 0.15s, transform 0.06s; }
+    button:hover { background-color: #357abd; transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .tab-btn { flex: 1; padding: 0.75rem; background: linear-gradient(180deg,#f4f6f9,#e9edf3); border: 1px solid rgba(0,0,0,0.04); border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .tab-btn.active { background: var(--card-bg); box-shadow: 0 6px 20px rgba(0,0,0,0.06); border-left: 4px solid var(--brand-gold); }
+    .info-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 0 4px; vertical-align: middle; transition: transform 0.18s ease; }
+    .info-btn:hover { transform: scale(1.15); }
+    @media (max-width: 600px) { .tabs { flex-direction: column; } }
+    h2 { font-size: 2rem; margin-bottom: 1rem; color: var(--text); }
+    h3 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--muted); }
+    h4 { font-size: 1.15rem; margin-top: 1.5rem; color: var(--muted); }
+    #uploadButton { display: block; width: 100%; max-width: 320px; margin: 2rem auto; border-radius: 10px; }
+    #uploadButton:hover { box-shadow: 0 8px 26px rgba(74,144,226,0.12); }
+    button#tabA, button#tabB { text-transform: uppercase; }
+    .container > button { background: #999; margin-bottom: 1rem; border-radius: 8px; color: #fff; padding: 0.5rem 0.75rem; }
+    .container > button:hover { background: #777; }
+    /* small helpers */
+    .muted { color: var(--muted); font-size: 0.95rem; }
+    /* Emphasize Tax Description, Rooms, and specific labels */
+    h4 { font-weight: 700; color: var(--brand-gold); letter-spacing: 0.2px; }
+    /* Target specific form labels for stronger emphasis */
+    label[for="numBedrooms"],
+    label[for="areaType"],
+    label[for="agent_fee"],
+    label[for="interior_quality"],
+    label[for="exterior_quality"],
+    label[for="images"],
+    label[for="videos"] {
+      font-weight: 800;
+      color: var(--black);
+      font-size: 1.02rem;
+      letter-spacing: 0.3px;
+    }
+
+    /* Make upload button special, attractive, and classic-clear */
+    #uploadButton {
+      background: linear-gradient(90deg, var(--brand-blue) 0%, #2f6fbf 40%, var(--brand-gold) 100%);
+      border: 1px solid rgba(218,165,32,0.18);
+      color: #fff;
+      padding: 0.9rem 1.6rem;
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: 0.6px;
+      border-radius: 14px;
+      box-shadow: 0 8px 30px rgba(74,144,226,0.16), 0 2px 10px rgba(218,165,32,0.06) inset;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    #uploadButton:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(74,144,226,0.2), 0 4px 14px rgba(218,165,32,0.08) inset; }
+    #uploadButton:active { transform: translateY(-1px); }
+    /* add a small arrow icon visually without external assets */
+    #uploadButton::before {
+      content: "⬆";
+      display: inline-block;
+      font-size: 1.05rem;
+      transform: translateY(-1px);
+    }
+    /* Improve tab contrast and form control visibility */
+    .tab-btn { color: var(--muted); }
+    .tab-btn:hover { color: var(--brand-blue); }
+    .tab-btn.active { color: var(--black); }
+
+    /* Make checkboxes and radios clearly visible and themed */
+    input[type="checkbox"], input[type="radio"] {
+      accent-color: var(--brand-gold);
+      width: 1.15em;
+      height: 1.15em;
+      transform: translateY(0.05em);
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+    /* white placeholder text for quality fields (they are optional) */
+    #interior_quality::placeholder,
+    #exterior_quality::placeholder {
+      color: white;
+      opacity: 0.8; /* slightly faded so users know it's placeholder */
+    }
+    /* Slightly larger and clearer radios when used inline */
+    input[type="radio"] { border-radius: 50%; }
+
+    /* Fallback visible focus ring for older browsers */
+    input[type="checkbox"]:focus, input[type="radio"]:focus {
+      outline: 3px solid rgba(74,144,226,0.12);
+      outline-offset: 2px;
+    }
+    /* styles reused from standalone amenities page (adapted to new ID) */
+    #resourcesList h4, .resources-list h4 { margin: 0.75rem 0 0.25rem; color: var(--brand-gold); }
+    #resourcesList .amenity, .amenity { margin: 0.5rem 0; color: var(--text); }
+    #saveResourcesBtn { margin-top: 1rem; width: 100%; max-width: 280px; }
+    
+    /* Amenity cards horizontal layout */
+    #resourcesList { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+    .amenity-category { 
+      flex: 1; 
+      min-width: 250px; 
+       
+      /* background: linear-gradient(135deg, #f9fafb 0%, #f0f2f5 100%); */
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s ease;
+    }
+    .amenity-category:hover {
+      border-color: var(--brand-gold);
+      box-shadow: 0 8px 20px rgba(218, 165, 32, 0.1);
+      transform: translateY(-2px);
+    }
+    .amenity-category h4 {
+      margin: 0 0 1rem 0;
+      font-size: 1.1rem;
+      color: var(--brand-gold);
+            border-bottom: 2px solid rgba(218, 165, 32, 0.2);
+
+      /* border-bottom: 2px solid rgba(218, 165, 32, 0.2); */
+      padding-bottom: 0.75rem;
+    }
+    .amenity-items {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .amenity-items label {
+      display: flex;
+      align-items: center;
+      margin: 0;
+      padding: 0.5rem 0.75rem;
+       color:white;  /* newly Added */
+      /* background: white; */
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .amenity-items label:hover {
+      /* background: #f5f5f5; */
+      border-color: var(--brand-blue);
+    }
+    .amenity-items input[type="checkbox"] {
+      margin-right: 0.75rem;
+      flex-shrink: 0;
+      /* removed stray 'anima' token */
+    }
+    @media (max-width: 768px) {
+      .amenity-category {
+        min-width: 100%;
+      }
+    }
+  </style>
+
+  
+<style>
+  #con{
+            width: 100%;
+            height: 100%;
+            color: white;
+            position: relative;
+            z-index: 2;
+        }
+</style>
+<link rel="stylesheet" href="/background/backgroundcss.css"/>
+</head>
+<body>
+
+
+    <div id="backgroundDesign"   imageLocation="/background/house.png"></div>
+
+    <div id="con">  <!------For Background-->
+
+  
+  <div class="container">
+      <button onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+  
+    <h2>
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2L3 7v7c0 5 3.8 9.6 9 10 5.2-.4 9-5 9-10V7l-9-5zM11 11h2v5h-2v-5zm0-4h2v2h-2V7z"/></svg>
+      Upload House
+    </h2>
+    <!-- slot dropdown moved here so landlord chooses which purchased slot to use before filling Section A -->
+    <div class="form-group" style="margin-top:1rem;">
+      <label for="slotSelect">Select Slot:</label>
+      <select id="slotSelect" required>
+        <option value="">Loading...</option>
+      </select>
+      <p class="muted" style="font-size:0.85rem; margin-top:0.3rem;">Only slots with one or more remaining uses and not yet expired are available.</p>
+    </div>
+
+    <!-- collapsible panels -->
+    <details open style="margin-top:1rem;">
+      <summary><strong>Section A: Upload House Form</strong></summary>
+      <div class="card" id="uploadCard" style="margin-top:1rem;">
+        <h3><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h2v-2H3v2zm4 0h14v-2H7v2zM3 19h2v-2H3v2zm0-12h2V5H3v2zm4 0h14V5H7v2z"/></svg>Upload House</h3>
+        <form id="uploadForm" enctype="multipart/form-data">
+        <!-- form content begins -->
+        <!-- form content begins -->
+        <div class="form-group">
+          <label for="title">Title:</label>
+          <input type="text" id="title" placeholder="title" required>
+        </div>
+        <div class="form-group">
+          <label for="description">Description:</label>
+          <textarea id="description" placeholder="Enter Description / House detail"></textarea>
+        </div>
+        <div class="form-group" style="  border-radius:10px; border:1px solid rgba(74,144,226,0.12);">
+          <label for="price" style="display:block; font-size:1.25rem; font-weight:900; color:white; margin-bottom:0.25rem;">
+            Rent Fee / Price = Rent + Lawyer Fee (if any) + Agent (if any)
+          </label>
+          <input type="number" id="price" name="price" placeholder="Enter Rent Fee" required style="border:2px solid var(--brand-gold); font-size:1.15rem; padding:0.75rem; box-shadow:0 6px 20px rgba(74,144,226,0.08);" />
+          <p class="muted" style="font-size:0.9rem; margin-top:0.5rem;">Price / rent fee will be shown to the public.</p>
+          <div style="margin-top:0.75rem;">
+            <label for="rentPeriod" style="font-weight:800; display:block; color:#ddd; margin-bottom:0.25rem;">Rent Period</label>
+            <select id="rentPeriod" name="rent_period" required style="border:2px solid #DAA520; padding:0.6rem; font-weight:700;">
+              <option value="">Select period</option>
+               <option value="6 months">6 months</option>
+              <option value="7 months">7 months</option>
+              <option value="8 months">8 months</option>
+              <option value="9 months">9 months</option>
+              <option value="1 year" selected>1 year</option>
+              <option value="2 years">2 years</option>
+              <option value="3 years">3 years</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="state">Select State:</label>
+          <select id="state" required>
+            <option value="">-- Select State --</option>
+            <option value="Abia">Abia</option>
+            <option value="Adamawa">Adamawa</option>
+            <option value="Akwa Ibom">Akwa Ibom</option>
+            <option value="Anambra">Anambra</option>
+            <option value="Bauchi">Bauchi</option>
+            <option value="Bayelsa">Bayelsa</option>
+            <option value="Benue">Benue</option>
+            <option value="Borno">Borno</option>
+            <option value="Cross River">Cross River</option>
+            <option value="Delta">Delta</option>
+            <option value="Ebonyi">Ebonyi</option>
+            <option value="Edo">Edo</option>
+            <option value="Ekiti">Ekiti</option>
+            <option value="Enugu">Enugu</option>
+            <option value="Gombe">Gombe</option>
+            <option value="Imo">Imo</option>
+            <option value="Jigawa">Jigawa</option>
+            <option value="Kaduna">Kaduna</option>
+            <option value="Kano">Kano</option>
+            <option value="Katsina">Katsina</option>
+            <option value="Kebbi">Kebbi</option>
+            <option value="Kogi">Kogi</option>
+            <option value="Kwara">Kwara</option>
+            <option value="Lagos">Lagos</option>
+            <option value="Nasarawa">Nasarawa</option>
+            <option value="Niger">Niger</option>
+            <option value="Ogun">Ogun</option>
+            <option value="Ondo">Ondo</option>
+            <option value="Osun">Osun</option>
+            <option value="Oyo">Oyo</option>
+            <option value="Plateau">Plateau</option>
+            <option value="Rivers">Rivers</option>
+            <option value="Sokoto">Sokoto</option>
+            <option value="Taraba">Taraba</option>
+            <option value="Yobe">Yobe</option>
+            <option value="Zamfara">Zamfara</option>
+            <option value="FCT">FCT (Federal Capital Territory)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="area">Select Area (LGA):</label>
+          <select id="area" required>
+            <option value="">-- Select Area --</option>
+          </select>
+          <p class="muted" style="font-size:0.85rem; margin-top:0.3rem;">Area will be populated based on the state selected above.</p>
+        </div>
+        <div class="form-group">
+          <label for="location">Location:</label>
+          <input type="text" id="location" placeholder="Entre Location" required>
+        </div>
+        <!-- tax description block before room listing -->
+        <h4>Tax Description</h4>
+        <div class="form-group">
+          <label for="numBedrooms">No of Bedrooms:</label>
+          <select id="numBedrooms">
+            <option value="">Select Bedrooms</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="areaType">
+            Type of Area:
+            <button type="button" id="areaTypeInfoBtn" class="info-btn" title="Click for area type info">ℹ️</button>
+          </label>
+          <select id="areaType">
+            <option value="">Select Area Type</option>
+            <option value="Urban">Urban</option>
+            <option value="Rural">Rural</option>
+            <option value="Suburban">Suburban</option>
+            <option value="Peri-Urban">Peri-Urban</option>
+            <option value="Remote">Remote</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="taxFee">Tax Payment Fee:</label>
+          <input type="number" id="taxFee" readonly style="display:none;">
+          <button type="button" id="reloadFeeBtn" style="margin-top:0.5rem; display:inline-block;">Reload Fee</button>
+        </div>
+        <h4>Rooms</h4>
+        <div class="form-group" id="bedroomsContainer">
+          <!-- bedrooms will be rendered here based on selected count -->
+        </div>
+        <!-- Seating Room and Living Room removed from GUI as requested -->
+        <div class="form-group">
+          <label><input type="checkbox" id="kitchen_available" checked> <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v11h10V2H7zm9 9H8V3h8v8zM5 14h14v6H5v-6z"/></svg>Kitchen</label>
+          <div>
+            <label><input type="radio" name="kitchen_type" value="select" checked> Select size</label>
+            <label><input type="radio" name="kitchen_type" value="custom"> Custom size</label>
+          </div>
+          <select id="kitchen_size" data-room-size style="display:block;"></select>
+          <input type="text" id="kitchen_custom" placeholder="e.g. 100 sq ft" style="display:none;">
+        </div>
+        <div class="form-group">
+          <label><input type="checkbox" id="bathroom_available" checked> <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10v4H7V2zm0 6h10v14H7V8zm2 2v10h6V10H9z"/></svg>Bathroom</label>
+          <div>
+            <label><input type="radio" name="bathroom_type" value="select" checked> Select size</label>
+            <label><input type="radio" name="bathroom_type" value="custom"> Custom size</label>
+          </div>
+          <select id="bathroom_size" data-room-size style="display:block;"></select>
+          <input type="text" id="bathroom_custom" placeholder="e.g. 50 sq ft" style="display:none;">
+        </div>
+        <div class="form-group">
+          <label for="electricity">Electricity:</label>
+          <select id="electricity">
+            <option value="">-- Select Electricity Option --</option>
+            <option value="Yes Electricity">Yes Electricity</option>
+            <option value="Prepaid meter (pay as you go)">Prepaid meter (pay as you go)</option>
+            <option value="Prepared meter on individual recharged">Prepared meter on individual recharged</option>
+            <option value="Prepared meter on general contribution for recharge">Prepared meter on general contribution for recharge</option>
+            <option value="Postpaid meter (Manual)">Postpaid meter (Manual)</option>
+            <option value="Postpaid Meter on individual payment">Postpaid Meter on individual payment</option>
+            <option value="Postpaid meter on general contribution for payment">Postpaid meter on general contribution for payment</option>
+            <option value="Yes Electricity but not functioning">Yes Electricity but not functioning</option>
+            <option value="No Electricity - tenants should provide for them self">No Electricity - tenants should provide for them self</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="alternative_electricity">Alternative Electricity:</label>
+          <select id="alternative_electricity">
+            <option value="">-- Select Alternative Electricity Option --</option>
+            <option value="tenants should provide for them self">tenants should provide for them self</option>
+            <option value="Landlord provide A dedicated Generator for all tenant usage">Landlord provide A dedicated Generator for all tenant usage</option>
+            <option value="Not allowed">Not allowed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="tenant_restrictions">Any restrictions for tenants (optional)?</label>
+          <textarea id="tenant_restrictions" placeholder="Enter any restrictions for tenants..."></textarea>
+        </div>
+        <div class="form-group">
+          <h4>Tenant Category</h4>
+          <p style="font-size: 0.9rem; color: white; margin: 0.5rem 0;">Select applicable tenant categories:</p>
+          <div id="tenantCategoryCheckboxes" style="display:flex; flex-wrap:wrap; gap:1rem; align-items:flex-start;"></div>
+        </div>
+        <div class="form-group">
+          <label for="additional_tenant_description">Additional Tenant Description (optional):</label>
+          <textarea id="additional_tenant_description" placeholder="Provide any additional information about tenant preferences or requirements..."></textarea>
+        </div>
+        <div class="form-group">
+          <label><input type="checkbox" id="lawyerInCharge"> Lawyer is in charge of property</label>
+          <div id="lawyerContactFields" style="display:none; margin-top:0.5rem; padding:0.75rem; border:1px solid rgba(74,144,226,0.2); border-radius:6px;">
+            <div class="form-group">
+              <label for="lawyerName">Lawyer Name:</label>
+              <input type="text" id="lawyerName" name="lawyer_name" placeholder="Lawyers Name">
+            </div>
+            <div class="form-group">
+              <label for="lawyerPhone">Lawyer Phone:</label>
+              <input type="tel" id="lawyerPhone" name="lawyer_phone" placeholder=" Enter Lawyer Phone Number">
+            </div>
+            <div class="form-group">
+              <label for="lawyerEmail">Lawyer Email:</label>
+              <input type="email" id="lawyerEmail" name="lawyer_email" placeholder="Enter Lawyer's Email">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label><input type="checkbox" id="agentInCharge"> Agent or Property Manager is in charge</label>
+          <div id="agentContactFields" style="display:none; margin-top:0.5rem; padding:0.75rem; border:1px solid rgba(74,144,226,0.2); border-radius:6px;">
+            <div class="form-group">
+              <label for="agentName">Agent/Manager Name:</label>
+              <input type="text" id="agentName" name="agent_name" placeholder="Agent or Property Manager Name">
+            </div>
+            <div class="form-group">
+              <label for="agentPhone">Agent/Manager Phone:</label>
+              <input type="tel" id="agentPhone" name="agent_phone" placeholder="Enter Agent/Manager Phone Number">
+            </div>
+            <div class="form-group">
+              <label for="agentEmail">Agent/Manager Email:</label>
+              <input type="email" id="agentEmail" name="agent_email" placeholder="Enter Agent/Manager Email">
+            </div>
+            <div class="form-group">
+              <label for="agentFee">Agent Fee:</label>
+              <input type="number" id="agentFee" name="agent_fee" step="0.01" placeholder="Enter agent fee amount">
+            </div>
+            <div class="form-group">
+              <label><input type="checkbox" id="payAgentByCash" name="pay_agent_by_cash"> Pay Agent by Cash</label>
+            </div>
+            <div class="form-group">
+              <label for="agentAdditionalInfo">Additional Agent Information (optional):</label>
+              <textarea id="agentAdditionalInfo" name="agent_additional_info" placeholder="Any additional information about the agent or manager..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="interior_quality">Interior Quality <span style="font-weight:normal;color:var(--muted);">(optional)</span>:</label>
+          <textarea id="interior_quality" placeholder="Describe interior condition (optional)" style="background:#333;color:#fff;"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="exterior_quality">Exterior Quality <span style="font-weight:normal;color:var(--muted);">(optional)</span>:</label>
+          <textarea id="exterior_quality" placeholder="Describe exterior condition (optional)" style="background:#333;color:#fff;"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Images: <small style="color:white; display:block;">Image 1 is required; up to 2 additional optional images. Each image must be under 1MB. Provide a title/caption for each image.</small></label>
+          <div style="display:flex;gap:0.75rem;flex-direction:column;">
+            <div>
+              <input type="file" id="image1" name="images" accept="image/*" required />
+              <div id="image1_preview" style="margin-top:0.5rem;display:none;align-items:center;gap:0.5rem;"></div>
+              <input type="text" name="image_captions[]" id="image1_caption" placeholder="Image 1 caption/title (optional)" style="margin-top:0.5rem;" />
+              <div id="image1_msg" style="color:#f44336;font-size:0.9rem;display:none;margin-top:0.25rem;"></div>
+            </div>
+            <div>
+              <input type="file" id="image2" name="images" accept="image/*" />
+              <div id="image2_preview" style="margin-top:0.5rem;display:none;align-items:center;gap:0.5rem;"></div>
+              <input type="text" name="image_captions[]" id="image2_caption" placeholder="Image 2 caption/title (optional)" style="margin-top:0.5rem;" />
+              <div id="image2_msg" style="color:#f44336;font-size:0.9rem;display:none;margin-top:0.25rem;"></div>
+            </div>
+            <div>
+              <input type="file" id="image3" name="images" accept="image/*" />
+              <div id="image3_preview" style="margin-top:0.5rem;display:none;align-items:center;gap:0.5rem;"></div>
+              <input type="text" name="image_captions[]" id="image3_caption" placeholder="Image 3 caption/title (optional)" style="margin-top:0.5rem;" />
+              <div id="image3_msg" style="color:#f44336;font-size:0.9rem;display:none;margin-top:0.25rem;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Video: <small style="color:white; display:block;">Select one video (max 6MB).</small></label>
+          <input type="file" id="video" name="video" accept="video/*" />
+          <div id="video_msg" style="color:#f44336;font-size:0.9rem;display:none;margin-top:0.25rem;"></div>
+        </div>
+          <h4>Payment Account</h4>
+          <div class="form-group">
+            <label><input type="checkbox" id="useDedicatedAccount"> Use dedicated payment account for this house</label>
+          </div>
+          <div id="dedicatedAccountFields" style="display:none;">
+            <div class="form-group">
+              <label for="ded_bank_name">Bank Name:</label>
+              <input type="text" name="ded_bank_name" id="ded_bank_name">
+            </div>
+            <div class="form-group">
+              <label for="ded_account_number">Account Number:</label>
+              <input type="text" name="ded_account_number" id="ded_account_number">
+            </div>
+            <div class="form-group">
+              <label for="ded_account_name">Account Name:</label>
+              <input type="text" name="ded_account_name" id="ded_account_name">
+            </div>
+          </div>
+        <div style="text-align:center;margin-top:1rem;">
+          <button id="uploadButton" type="button" style="margin-top:0.5rem;">
+            <span class="btn-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zm7-18L5.33 9h3.17v6h6V9h3.17L12 2z"/></svg></span>
+            Upload House
+          </button>
+        </div>
+      </form>
+    </div> <!-- end uploadCard -->
+    </details>
+
+    <details style="margin-top:1rem;">
+      <summary><strong>Section B: Amenities</strong></summary>
+      <div style="margin-top:1rem;">
+            <div class="card" style="margin-top:1rem;">
+              <h3><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2L3 7v7c0 5 3.8 9.6 9 10 5.2-.4 9-5 9-10V7l-9-5zM11 11h2v5h-2v-5zm0-4h2v2h-2V7z"/></svg>
+                Select Special Resources</h3>
+              <div class="form-group" style="margin-top:0.5rem;">
+                <label for="houseSelectB">Select House:</label>
+                <select id="houseSelectB" name="houseSelectB">
+                  <option value="">-- Select House --</option>
+                </select>
+                <p class="muted" style="font-size:0.85rem; margin-top:0.3rem;"><strong>Note:</strong> Houses listed below are filtered by your selected slot above. Choose a house to apply amenities to. Leave empty to create new.</p>
+              </div>
+              <!-- container where categories and checkboxes will be populated -->
+              <div id="resourcesList"></div>
+              <button id="saveResourcesBtn" style="margin-top:1rem;background:#4a90e2;">
+                <span class="btn-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M17 3H5c-1.1 0-2 .9-2 2v14l4-4h10c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7 10h10v2H7v-2z"/></svg></span>
+                Save Resources
+              </button>
+            </div>
+      </div>
+    </details>
+
+    <!-- Section C: Documents -->
+    <details style="margin-top:1rem;">
+      <summary><strong>Section C: Documents</strong></summary>
+      <div class="card" style="margin-top:1rem;">
+        <h3>Upload or add legal documents</h3>
+        <div class="form-group" style="margin-top:0.5rem;">
+          <label for="houseSelectC">Select House:</label>
+          <select id="houseSelectC" name="houseSelectC">
+            <option value="">-- Select House --</option>
+          </select>
+          <p class="muted" style="font-size:0.85rem; margin-top:0.3rem;"><strong>Note:</strong> Houses listed below are filtered by your selected slot above. Choose which house these documents apply to, if any.</p>
+        </div>
+        <div class="form-group">
+          <label for="terms_text">Terms & Conditions (summary)</label>
+          <textarea id="terms_text" placeholder="Short summary / notes"></textarea>
+          <label for="terms_file" style="margin-top:0.5rem;">Upload Terms & Conditions (PDF)</label>
+          <input type="file" id="terms_file" accept="application/pdf">
+        </div>
+        <div class="form-group">
+          <label for="lawyer_text">Lawyer Paper (summary)</label>
+          <textarea id="lawyer_text" placeholder="Short summary / notes"></textarea>
+          <label for="lawyer_file" style="margin-top:0.5rem;">Upload Lawyer Paper (PDF)</label>
+          <input type="file" id="lawyer_file" accept="application/pdf">
+        </div>
+        <div class="form-group">
+          <label for="tenancy_text">Tenancy Agreement (summary)</label>
+          <textarea id="tenancy_text" placeholder="Short summary / notes"></textarea>
+          <label for="tenancy_file" style="margin-top:0.5rem;">Upload Tenancy Agreement (PDF)</label>
+          <input type="file" id="tenancy_file" accept="application/pdf">
+        </div>
+        <button id="saveDocsBtn" type="button" style="background:#4a90e2;">Save Documents</button>
+      </div>
+    </details>
+
+    <!-- Section D: Google Map Location (optional) -->
+    <details style="margin-top:1rem;">
+      <summary><strong>Section D: Map Location <span style="color:#999;font-weight:normal;">(optional)</span></strong></summary>
+      <div class="card" style="margin-top:1rem;">
+        <h3>Add location via Google Map</h3>
+        <div class="form-group" style="margin-top:0.5rem;">
+          <label for="houseSelectD">Select House:</label>
+          <select id="houseSelectD" name="houseSelectD">
+            <option value="">-- Select House --</option>
+          </select>
+          <p class="muted" style="font-size:0.85rem; margin-top:0.3rem;"><strong>Note:</strong> Houses listed below are filtered by your selected slot above. Pick a house to update its saved coordinates. Leave empty to set coordinates for a new listing.</p>
+        </div>
+        <p class="muted">Pinpoint your property location on the map for better visibility. Coordinates will be saved automatically.</p>
+        <div class="form-group">
+          <label for="map_latitude">Latitude:</label>
+          <input type="number" id="map_latitude" placeholder="e.g. 6.5244" step="0.00001">
+        </div>
+        <div class="form-group">
+          <label for="map_longitude">Longitude:</label>
+          <input type="number" id="map_longitude" placeholder="e.g. 3.3792" step="0.00001">
+        </div>
+        <div class="form-group">
+          <label>Map Preview:</label>
+          <div id="mapContainer" style="width:100%;height:300px;border:1px solid #ddd;border-radius:8px;background:#f9f9f9;display:flex;align-items:center;justify-content:center;color:#999;">
+            <span>Enter coordinates above to preview location</span>
+          </div>
+        </div>
+        <button id="updateMapBtn" type="button" style="background:#DAA520;margin-top:0.5rem;">Update Map Preview</button>
+        <button id="saveMapBtn" type="button" style="background:#28a745;margin-top:0.5rem;margin-left:0.5rem;">Save Location</button>
+      </div>
+    </details>
+
+    <!-- upload button moved into Section A -->
+  </div>
+</div>
+
+
+<script src="/background/backgroundscript.js"></script>
+
+
+  <!-- External JavaScript modules for each section -->
+  <script src="/propertyOwner/UploadhouseJS/sectionAFileValidation.js"></script>
+  <script src="/propertyOwner/UploadhouseJS/common.js"></script>
+  <script src="/propertyOwner/UploadhouseJS/sectionA.js"></script>
+  <script src="/propertyOwner/UploadhouseJS/sectionB.js"></script>
+  <script src="/propertyOwner/UploadhouseJS/sectionC.js"></script>
+  <script src="/propertyOwner/UploadhouseJS/sectionD.js"></script>
+</body>
+</html>
+</html>

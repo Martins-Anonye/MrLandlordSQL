@@ -1,0 +1,123 @@
+<div class="card">
+  <h3>Room Sizes</h3>
+  <form id="roomSizeForm">
+    <div class="form-group">
+      <label for="roomName">Name:</label>
+      <input type="text" id="roomName" required>
+    </div>
+    <div class="form-group">
+      <label for="roomSizeText">Size Text:</label>
+      <input type="text" id="roomSizeText" required>
+    </div>
+    <button type="submit">Add Room Size</button>
+  </form>
+  <table id="roomSizesTable">
+    <thead>
+      <tr><th>Name</th><th>Size Text</th><th>Actions</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+  const token = localStorage.getItem('token');
+
+  // Load room sizes
+  function loadRoomSizes() {
+    const token = localStorage.getItem('token');
+    fetch('/api/admin/room-sizes', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`Load room sizes failed: ${res.status}`);
+        return res.json();
+      })
+      .then(sizes => {
+        const tbody = document.querySelector('#roomSizesTable tbody');
+        tbody.innerHTML = '';
+        if (sizes && Array.isArray(sizes)) {
+          sizes.forEach(size => {
+            const row = `<tr>
+            <td>${size.name}</td>
+            <td>${size.size_text}</td>
+            <td>
+              <button onclick="editRoomSize(${size.id})">Edit</button>
+              <button onclick="deleteRoomSize(${size.id})">Delete</button>
+            </td>
+          </tr>`;
+            tbody.innerHTML += row;
+          });
+        }
+      })
+      .catch(err => console.error('Error loading room sizes:', err));
+  }
+  loadRoomSizes();
+
+  // handle create/update via same form
+  document.getElementById('roomSizeForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = document.getElementById('roomSizeForm');
+    const editId = form.dataset.editId;
+    const name = document.getElementById('roomName').value;
+    const size_text = document.getElementById('roomSizeText').value;
+    const token = localStorage.getItem('token');
+
+    let res;
+    if (editId) {
+      res = await fetch(`/api/admin/room-sizes/${editId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ name, size_text })
+      });
+    } else {
+      res = await fetch('/api/admin/room-sizes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ name, size_text })
+      });
+    }
+    const data = await res.json();
+    alert(data.message);
+    if (res.ok) {
+      form.reset();
+      if (editId) {
+        delete form.dataset.editId;
+        document.querySelector('#roomSizeForm button').textContent = 'Add Room Size';
+      }
+      loadRoomSizes();
+    }
+  });
+
+  // Edit room size
+  window.editRoomSize = async (id) => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`/api/admin/room-sizes/${id}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) {
+      alert('Failed to load room size');
+      return;
+    }
+    const size = await res.json();
+    document.getElementById('roomName').value = size.name;
+    document.getElementById('roomSizeText').value = size.size_text;
+    const form = document.getElementById('roomSizeForm');
+    form.dataset.editId = id;
+    document.querySelector('#roomSizeForm button').textContent = 'Update Room Size';
+    scrollToTop();
+  };
+
+  // Delete room size
+  window.deleteRoomSize = async (id) => {
+    if (confirm('Delete room size?')) {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`/api/admin/room-sizes/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      alert(data.message);
+      loadRoomSizes();
+    }
+  };
+</script>

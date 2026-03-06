@@ -1,0 +1,36 @@
+<div class="card">
+  <h3>Users</h3>
+  <div id="usersContainer"></div>
+</div>
+
+<script>
+  function loadUsers() {
+    const token = localStorage.getItem('token');
+    fetch('/api/admin/users', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`Load users failed: ${res.status}`);
+        return res.json();
+      })
+      .then(users => {
+        const container = document.getElementById('usersContainer');
+        container.innerHTML = '';
+        if (users && Array.isArray(users)) {
+          users.forEach(u => {
+            const userCard = document.createElement('div');
+            userCard.className = 'user-card';
+            userCard.innerHTML = `
+              <p><strong>Email:</strong> ${u.email}</p>
+              <p><strong>Name:</strong> ${u.name || 'N/A'}</p>
+              <p><strong>Role:</strong> ${u.role}</p>
+            `;
+            container.appendChild(userCard);
+          });
+        }
+      })
+      .catch(err => console.error('Error loading users:', err));
+  }
+
+  loadUsers();
+</script>

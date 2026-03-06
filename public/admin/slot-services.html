@@ -1,0 +1,272 @@
+<div class="card">
+  <h3>Slot Services Management</h3>
+  <!-- area for displaying load errors or messages -->
+  <div id="slotServicesError" style="color: red; margin-bottom: 1rem;"></div>
+  
+  <style>
+    .info-btn {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0 4px;
+      vertical-align: middle;
+      transition: transform 0.2s ease;
+    }
+    .info-btn:hover {
+      transform: scale(1.2);
+    }
+  </style>
+  
+  <form id="createSlotServiceForm">
+    <div class="form-group">
+      <label for="serviceSlotId">Select Slot:</label>
+      <select id="serviceSlotId" required>
+        <option value="">Select Slot</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="serviceName">Service Name:</label>
+      <input type="text" id="serviceName" required>
+    </div>
+    <div class="form-group">
+      <label for="serviceTax">Tax:</label>
+      <input type="number" id="serviceTax" step="0.01">
+    </div>
+    <div class="form-group">
+      <label for="numberOfRooms">Number of Rooms (Parlor and Bedroom):</label>
+      <input type="number" id="numberOfRooms" min="0">
+    </div>
+    <div class="form-group">
+      <label for="areaType">
+        Type of Area:
+        <button type="button" id="areaTypeInfoBtn" class="info-btn" title="Click to see explanations">ℹ️</button>
+      </label>
+      <select id="areaType">
+        <option value="">Select Area Type</option>
+        <option value="Urban">Urban</option>
+        <option value="Rural">Rural</option>
+        <option value="Suburban">Suburban</option>
+        <option value="Peri-Urban">Peri-Urban</option>
+        <option value="Remote">Remote</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="areaDescription">Area Description:</label>
+      <textarea id="areaDescription"></textarea>
+    </div>
+    <button type="submit">Add Slot Service</button>
+  </form>
+  <table id="slotServicesTable">
+    <thead>
+      <tr><th>Slot ID</th><th>Service ID</th><th>Service Name</th><th>Tax</th><th>Number of Rooms</th><th>Area Type</th><th>Area Description</th><th>Actions</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+  const token = localStorage.getItem('token');
+
+  // Load slots for dropdown
+  function loadSlotsForServiceDropdown() {
+    const token = localStorage.getItem('token');
+    fetch('/api/admin/slots', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+        .then(res => {
+          if (!res.ok) {
+            if (res.status === 403) {
+              const el = document.getElementById('slotServicesError');
+              if (el) el.textContent = 'Unauthorized – please log in again.';
+            }
+            throw new Error(`Load slots for dropdown failed: ${res.status}`);
+          }
+        return res.json();
+      })
+      .then(slots => {
+        const dropdown = document.getElementById('serviceSlotId');
+          if (slots && Array.isArray(slots)) {
+        slots.forEach(slot => {
+          const option = document.createElement('option');
+          option.value = slot.id;
+          option.textContent = `type: ${slot.type}, title : ${slot.slot_title}, (ID: ${slot.id}), capacity ${slot.capacity} , price: $${slot.price},  duration: ${slot.duration} days, status: ${slot.purchase_status}`;
+          dropdown.appendChild(option);
+        });
+            if (slots.length === 0) {
+              const el = document.getElementById('slotServicesError');
+              if (el) el.textContent = 'No slots available for service dropdown.';
+            }
+        }
+      })
+      .catch(err => console.error('Error loading slots:', err));
+  }
+  loadSlotsForServiceDropdown();
+
+  // Load slot services
+  function loadSlotServices() {
+    const token = localStorage.getItem('token');
+    console.log('slot-services: using token', token);
+    fetch('/api/slot-services/admin/all', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) {
+          // show user-friendly message on 403 (expired/invalid token)
+          if (res.status === 403) {
+            const el = document.getElementById('slotServicesError');
+            if (el) el.textContent = 'Unauthorized – please log in again.';
+          }
+          throw new Error(`Load slot services failed: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(services => {
+        const tbody = document.getElementById('slotServicesTable').querySelector('tbody');
+        tbody.innerHTML = '';
+        if (services && Array.isArray(services)) {
+          if (services.length === 0) {
+            const el = document.getElementById('slotServicesError');
+            if (el) el.textContent = 'No slot services found.';
+          }
+          services.forEach(service => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${service.slot_id}</td>
+            <td>${service.service_id}</td>
+            <td>${service.service_name}</td>
+            <td>${service.tax || 'N/A'}</td>
+            <td>${service.number_of_rooms || 'N/A'}</td>
+            <td>${service.area_type || 'N/A'}</td>
+            <td>${service.area_description || 'N/A'}</td>
+            <td>
+              <button onclick="editSlotService(${service.id})">Edit</button>
+              <button onclick="deleteSlotService(${service.id})">Delete</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+          });
+        }
+      })
+      .catch(err => console.error('Error loading slot services:', err));
+  }
+  loadSlotServices();
+
+  // ensure list refreshes when user navigates to slot services section
+  const navBtn = document.querySelector('button[data-section="slotServicesSection"]');
+  if (navBtn) {
+    navBtn.addEventListener('click', loadSlotServices);
+  }
+
+  // Handle form submission for create or update
+  document.getElementById('createSlotServiceForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = document.getElementById('createSlotServiceForm');
+    const editId = form.dataset.editId;
+    const slot_id = document.getElementById('serviceSlotId').value;
+    const service_name = document.getElementById('serviceName').value;
+    const tax = document.getElementById('serviceTax').value;
+    const number_of_rooms = document.getElementById('numberOfRooms').value;
+    const area_type = document.getElementById('areaType').value;
+    const area_description = document.getElementById('areaDescription').value;
+    const token = localStorage.getItem('token');
+
+    let res;
+    if (editId) {
+      // update existing service
+      res = await fetch(`/api/slot-services/${editId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ 
+          slot_id, 
+          service_name, 
+          tax: tax ? parseFloat(tax) : null,
+          number_of_rooms: number_of_rooms ? parseInt(number_of_rooms) : null,
+          area_type: area_type || null,
+          area_description: area_description || null
+        })
+      });
+    } else {
+      // create new service
+      res = await fetch('/api/slot-services', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ 
+          slot_id, 
+          service_name, 
+          tax: tax ? parseFloat(tax) : null,
+          number_of_rooms: number_of_rooms ? parseInt(number_of_rooms) : null,
+          area_type: area_type || null,
+          area_description: area_description || null
+        })
+      });
+    }
+
+    const data = await res.json();
+    alert(data.message);
+    if (res.ok) {
+      form.reset();
+      if (editId) {
+        delete form.dataset.editId;
+        document.querySelector('#createSlotServiceForm button').textContent = 'Add Slot Service';
+      }
+      loadSlotServices();
+    }
+  });
+
+  // Edit slot service
+  window.editSlotService = async (id) => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`/api/slot-services/${id}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) {
+      alert('Error loading service: ' + (res.status === 403 ? 'Unauthorized' : res.status));
+      return;
+    }
+    const service = await res.json();
+    
+    document.getElementById('serviceSlotId').value = service.slot_id;
+    document.getElementById('serviceName').value = service.service_name;
+    document.getElementById('serviceTax').value = service.tax || '';
+    document.getElementById('numberOfRooms').value = service.number_of_rooms || '';
+    document.getElementById('areaType').value = service.area_type || '';
+    document.getElementById('areaDescription').value = service.area_description || '';
+    
+    document.getElementById('createSlotServiceForm').dataset.editId = id;
+    document.querySelector('#createSlotServiceForm button').textContent = 'Update Slot Service';
+  };
+
+
+  // Delete slot service
+  window.deleteSlotService = async (id) => {
+    if (confirm('Delete this slot service?')) {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`/api/slot-services/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      alert(data.message);
+      loadSlotServices();
+    }
+  };
+
+  // Area Type Info Button
+  document.getElementById('areaTypeInfoBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    const areaTypeInfo = {
+      'Urban': 'City or town areas with high population density, developed infrastructure, commercial establishments, and multiple services.',
+      'Rural': 'Agricultural or countryside areas with low population density, farming activities, limited services, and natural surroundings.',
+      'Suburban': 'Residential zones near cities, typically well-developed with homes, shops, and services. Example: Lagos\' Lekki suburb. Suburban areas feel more established and organized with clear infrastructure planning.',
+      'Peri-Urban': 'Transition zones between city and countryside, often less developed with a mix of agriculture and new urban projects and new housing. Example: Fringes of Ibadan. These areas face both urban and rural challenges, with semi-developed land and ongoing development. They feel more in-between compared to established suburban areas.',
+      'Remote': 'Isolated or far-flung areas with very low population density, limited access to services, and minimal infrastructure development.'
+    };
+    
+    let message = 'Area Type Explanations:\n\n';
+    for (const [type, description] of Object.entries(areaTypeInfo)) {
+      message += `${type}:\n${description}\n\n`;
+    }
+    alert(message);
+  });
+</script>

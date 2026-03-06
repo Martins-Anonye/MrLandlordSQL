@@ -15,23 +15,13 @@ VALUES
 
 
 
--- Insert a sample house slot
-INSERT INTO slots (type, slot_title, slot_description, capacity, duration, price, tax)
-VALUES (
-  'house',
-  'House Slot A',
-  'Basic slot for listing houses',
-  5,              -- landlord can list up to 5 houses
-  30,             -- duration in days
-  100.00,         -- price
-  10.00           -- tax
-);
+
 
 -- Assume landlord has id = 2 (replace with actual landlord user id)
 -- Insert a purchased slot for that landlord
-INSERT INTO purchased_slots (slot_id, landlord_id, status)
-VALUES (
-  (SELECT id FROM slots WHERE type = 'house' LIMIT 1),
-  2,   -- replace with your landlord’s user id
-  'active'
-);
+-- INSERT INTO purchased_slots (slot_id, landlord_id, status)
+-- VALUES (
+--   (SELECT id FROM slots WHERE type = 'house' LIMIT 1),
+--   2,   -- replace with your landlord’s user id
+--   'active'
+-- );

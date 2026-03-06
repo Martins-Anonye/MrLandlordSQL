@@ -1,0 +1,23 @@
+1) Lanlord should create account.
+2)Purchase slot (A purchase slot have capacity value). 
+Capacity value of slot determin the number of properties
+ (house and other property), a slot can hold.
+ Every slot have expiry date after purchase.
+ 3) Landlord can upload house and other property
+
+While landlord is uploading a house or other property,
+ landlord  should have a dropdownlist of purchased-slot  
+ that have capacity of one (1) and above.
+   Slot capacity is calculated using
+    (C:\Users\User PC\Documents\WebsiteHouseAgentOriginal\routes\slotCalc2BeUse4Capacty.js), 
+    and after house upload successfully ,
+    the capacity of the id of the purchased-slot
+     that was use for  house upload is minus by 1.
+
+
+
+
+How to update a property(House and others):
+     A capacity of a purchase slot that was used 
+      can be managed or reused by clearing used-capacity of a purchase slot,
+      provided the used purchase-Slott expiry date is valid.  

@@ -94,4 +94,28 @@ router.post('/select-asset-manager', async (req, res) => {
   }
 });
 
+// Get all asset managers (for dropdown in dashboard)
+router.get('/asset-managers', async (req, res) => {
+  const db = getDb();
+  try {
+    const [rows] = await db.execute(
+      'SELECT id, name FROM users WHERE role = ?',
+      ['asset_manager']
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Logout (clear session)
+router.post('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ error: 'Logout failed' });
+    }
+    res.json({ message: 'Logged out successfully' });
+  });
+});
+
 module.exports = router;

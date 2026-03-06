@@ -1,0 +1,28 @@
+#backgroundDesign{
+    margin: 0;
+    overflow: hidden;
+    background-color: blueviolet;   /*dark gradient background*/
+    width: 100%;
+    height: 100%;
+    position:fixed ;
+    z-index: 1;
+}
+
+.bubble{
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255);
+    animation: float 10s infinite;
+}
+
+@keyframes float{
+    0%{transform: translate(100vh, 50vh) scale(0.5);
+        opacity: 0;
+}
+50%{opacity: 1;
+    transform: translate(100vh,100vh) scale(0.5);
+}
+100%{transform: translate(-10vh) scale(1.2);
+        opacity: 0;}
+
+}

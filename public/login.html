@@ -32,7 +32,12 @@
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem('token', data.token);
-        window.location.href = '/dashboard';
+        // Redirect based on user role
+        if (data.user.role === 'admin' || data.user.role === 'super_admin') {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/dashboard';
+        }
       } else {
         alert(data.error);
       }

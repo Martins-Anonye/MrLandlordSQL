@@ -65,9 +65,10 @@ FROM purchased_slots ps
 JOIN slots s ON ps.slot_id = s.id
 LEFT JOIN used_slots us 
   ON ps.slot_id = us.slot_id AND ps.landlord_id = us.landlord_id
-WHERE ps.landlord_id = ? AND s.type = 'house'
+      WHERE ps.landlord_id = ? AND s.type = 'house'
+        AND DATE_ADD(ps.date_purchased, INTERVAL s.duration DAY) >= NOW()
 GROUP BY ps.id, ps.status, ps.date_purchased, s.slot_title, s.type, s.capacity, s.duration
-HAVING remaining_capacity > 0;
+  HAVING remaining_capacity > 0;
 `,
       [landlordId]
     );

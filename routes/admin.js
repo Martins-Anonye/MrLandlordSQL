@@ -1,5 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const { getDb } = require('../db'); // <-- use the pool
 // const dbPromise = (async () => {
@@ -9,10 +10,30 @@ const { getDb } = require('../db'); // <-- use the pool
 
 const router = express.Router();
 
-// Middleware to check admin
+// Middleware to check admin via session or JWT bearer token
 const isAdmin = (req, res, next) => {
-  if (req.session.role !== 'admin' && req.session.role !== 'super_admin') return res.status(403).json({ error: 'Admin access required' });
-  next();
+  // session-based check (existing behavior)
+  if (req.session && (req.session.role === 'admin' || req.session.role === 'super_admin')) {
+    return next();
+  }
+
+  // token-based check: look for Authorization header
+  const authHeader = req.headers.authorization || '';
+  if (authHeader.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+    try {
+      const payload = jwt.verify(token, 'jwt-secret-key');
+      if (payload.role === 'admin' || payload.role === 'super_admin') {
+        // attach user info to request for downstream use if needed
+        req.user = payload;
+        return next();
+      }
+    } catch (err) {
+      // invalid token falls through
+    }
+  }
+
+  return res.status(403).json({ error: 'Admin access required' });
 };
 
 // Get all checkins
@@ -132,6 +153,20 @@ router.get('/slots', isAdmin, async (req, res) => {
   }
 });
 
+// Get a single slot by ID (used when editing)
+router.get('/slots/:id', isAdmin, async (req, res) => {
+  const db = getDb();
+  try {
+    const [rows] = await db.execute('SELECT * FROM slots WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Slot not found' });
+    }
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Create slot
 router.post('/slots', isAdmin, async (req, res) => {
   const db = getDb();
@@ -186,6 +221,20 @@ router.get('/room-sizes', isAdmin, async (req, res) => {
   }
 });
 
+// Get a single room size by ID (used when editing)
+router.get('/room-sizes/:id', isAdmin, async (req, res) => {
+  const db = getDb();
+  try {
+    const [rows] = await db.execute('SELECT * FROM room_sizes WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Room size not found' });
+    }
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Add room size
 router.post('/room-sizes', isAdmin, async (req, res) => {
   const db = getDb();
@@ -228,6 +277,69 @@ router.post('/purchased-slots/:slotId/cancel', isAdmin, async (req, res) => {
   try {
     await db.execute('UPDATE purchased_slots SET status = "cancelled" WHERE slot_id = ? AND status = "active"', [slotId]);
     res.json({ message: 'Slot purchase cancelled successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Tenant Category Management (CRUD)
+// Get all tenant categories
+router.get('/tenant-categories', isAdmin, async (req, res) => {
+  const db = getDb();
+  try {
+    const [rows] = await db.execute('SELECT id, name, created_at, updated_at FROM tenant_category ORDER BY name ASC');
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Create tenant category
+router.post('/tenant-categories', isAdmin, async (req, res) => {
+  const db = getDb();
+  const { name } = req.body;
+  if (!name || name.trim() === '') {
+    return res.status(400).json({ error: 'Tenant category name is required' });
+  }
+  try {
+    const [result] = await db.execute('INSERT INTO tenant_category (name) VALUES (?)', [name.trim()]);
+    res.status(201).json({ message: 'Tenant category created', id: result.insertId, name: name.trim() });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') {
+      res.status(400).json({ error: 'Tenant category already exists' });
+    } else {
+      res.status(500).json({ error: err.message });
+    }
+  }
+});
+
+// Update tenant category
+router.put('/tenant-categories/:id', isAdmin, async (req, res) => {
+  const db = getDb();
+  const { id } = req.params;
+  const { name } = req.body;
+  if (!name || name.trim() === '') {
+    return res.status(400).json({ error: 'Tenant category name is required' });
+  }
+  try {
+    await db.execute('UPDATE tenant_category SET name = ? WHERE id = ?', [name.trim(), id]);
+    res.json({ message: 'Tenant category updated' });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') {
+      res.status(400).json({ error: 'Tenant category already exists' });
+    } else {
+      res.status(500).json({ error: err.message });
+    }
+  }
+});
+
+// Delete tenant category
+router.delete('/tenant-categories/:id', isAdmin, async (req, res) => {
+  const db = getDb();
+  const { id } = req.params;
+  try {
+    await db.execute('DELETE FROM tenant_category WHERE id = ?', [id]);
+    res.json({ message: 'Tenant category deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

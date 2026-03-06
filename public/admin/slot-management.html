@@ -1,0 +1,197 @@
+<div class="card">
+  <h3>Slot Management</h3>
+  <form id="createSlotForm">
+    <div class="form-group">
+      <label for="slotType">Type:</label>
+      <select id="slotType">
+        <option value="house">House</option>
+        <option value="hotel">Hotel</option>
+        <option value="shop">Shop</option>
+        <option value="car">Car</option>
+        <option value="bicycle">Bicycle</option>
+        <option value="motocycle">Motocycle</option>
+        <option value="baby">Baby Market</option>
+        <option value="general">General Public Market</option>
+        <option value="land">Land Market</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="slotTitle">Slot Title:</label>
+      <input type="text" id="slotTitle" required>
+    </div>
+    <div class="form-group">
+      <label for="slotDescription">Slot Description:</label>
+      <textarea id="slotDescription"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="slotCapacity">Capacity:</label>
+      <input type="number" id="slotCapacity" required>
+    </div>
+    <div class="form-group">
+      <label for="slotDuration">Duration (days):</label>
+      <input type="number" id="slotDuration" required>
+    </div>
+    <div class="form-group">
+      <label for="slotPrice">Price:</label>
+      <input type="number" id="slotPrice" step="0.01" required>
+    </div>
+    <div class="form-group">
+      <label for="slotTax">Tax:</label>
+      <input type="number" id="slotTax" step="0.01">
+    </div>
+    <button type="submit">Create Slot</button>
+  </form>
+  <table id="slotsTable">
+    <thead>
+      <tr><th>Type</th><th>Title</th><th>Description</th><th>Capacity</th><th>Duration</th><th>Price</th><th>Tax</th><th>Status</th><th>Landlord</th><th>Purchase Date</th><th>Actions</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+  const token = localStorage.getItem('token');
+
+  // Load slots
+  function loadSlots() {
+    const token = localStorage.getItem('token');
+    fetch('/api/admin/slots', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`Load slots failed: ${res.status}`);
+        return res.json();
+      })
+      .then(slots => {
+        const tbody = document.querySelector('#slotsTable tbody');
+        tbody.innerHTML = '';
+          if (slots && Array.isArray(slots)) {
+        slots.forEach(slot => {
+          const status = slot.purchase_status === 'active' ? 'Purchased' : 'Available';
+          const purchaseDate = slot.date_purchased ? new Date(slot.date_purchased).toLocaleDateString() : '-';
+          const row = `<tr>
+            <td>${slot.type}</td>
+            <td>${slot.slot_title}</td>
+            <td>${slot.slot_description || ''}</td>
+            <td>${slot.capacity}</td>
+            <td>${slot.duration}</td>
+            <td>${slot.price}</td>
+            <td>${slot.tax || ''}</td>
+            <td>${status}</td>
+            <td>${slot.landlord_name || 'Available'}</td>
+            <td>${purchaseDate}</td>
+            <td>
+              <button onclick="editSlot(${slot.id})">Edit</button>
+              <button onclick="deleteSlot(${slot.id})">Delete</button>
+              ${slot.purchase_status === 'active' ? `<button onclick="managePurchasedSlot(${slot.id}, '${slot.landlord_name}')">Manage</button>` : ''}
+            </td>
+          </tr>`;
+          tbody.innerHTML += row;
+        });
+        }
+      })
+      .catch(err => console.error('Error loading slots:', err));
+  }
+  loadSlots();
+
+  // Create slot
+  // handle form submission for create/update
+  document.getElementById('createSlotForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = document.getElementById('createSlotForm');
+    const editId = form.dataset.editId;
+    const type = document.getElementById('slotType').value;
+    const slot_title = document.getElementById('slotTitle').value;
+    const slot_description = document.getElementById('slotDescription').value;
+    const capacity = document.getElementById('slotCapacity').value;
+    const duration = document.getElementById('slotDuration').value;
+    const price = document.getElementById('slotPrice').value;
+    const tax = document.getElementById('slotTax').value;
+    const token = localStorage.getItem('token');
+
+    let res;
+    if (editId) {
+      res = await fetch(`/api/admin/slots/${editId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ type, slot_title, slot_description, capacity, duration, price, tax })
+      });
+    } else {
+      res = await fetch('/api/admin/slots', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ type, slot_title, slot_description, capacity, duration, price, tax })
+      });
+    }
+    const data = await res.json();
+    if (res.ok) {
+      alert(data.message);
+      // reset form if update
+      if (editId) {
+        delete form.dataset.editId;
+        document.querySelector('#createSlotForm button').textContent = 'Create Slot';
+      }
+      form.reset();
+    } else {
+      alert('Error: ' + (data.error || 'Unknown error'));
+    }
+    loadSlots();
+  });
+
+  // Edit slot (populate form)
+  window.editSlot = async (id) => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`/api/admin/slots/${id}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) {
+      alert('Unable to load slot for editing');
+      return;
+    }
+    const slot = await res.json();
+    document.getElementById('slotType').value = slot.type;
+    document.getElementById('slotTitle').value = slot.slot_title;
+    document.getElementById('slotDescription').value = slot.slot_description || '';
+    document.getElementById('slotCapacity').value = slot.capacity;
+    document.getElementById('slotDuration').value = slot.duration;
+    document.getElementById('slotPrice').value = slot.price;
+    document.getElementById('slotTax').value = slot.tax || '';
+    const form = document.getElementById('createSlotForm');
+    form.dataset.editId = id;
+    document.querySelector('#createSlotForm button').textContent = 'Update Slot';
+  };
+
+  // Delete slot
+  window.deleteSlot = async (id) => {
+    if (confirm('Delete slot?')) {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`/api/admin/slots/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      alert(data.message);
+      loadSlots();
+    }
+  };
+
+  // Manage purchased slot
+  window.managePurchasedSlot = async (slotId, landlordName) => {
+    const action = prompt(`Manage slot purchased by ${landlordName}. Options:\n1. Cancel purchase\n2. View usage\nEnter 1 or 2:`);
+    
+    if (action === '1') {
+      if (confirm(`Cancel slot purchase for ${landlordName}? This will make the slot available again.`)) {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/admin/purchased-slots/${slotId}/cancel`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        alert(data.message);
+        loadSlots();
+      }
+    } else if (action === '2') {
+      alert('Slot usage view not implemented yet. Check used slots page.');
+    }
+  };
+</script>
